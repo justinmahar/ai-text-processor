@@ -1,1 +1,2 @@
-export * from './components/Example';
+export * from './components/Processor';
+export * from './components/Settings';
