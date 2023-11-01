@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocalStorage } from 'react-storage-complete';
+import { StorageOptions, useLocalStorage } from 'react-storage-complete';
 
 /**
  * Local settings for the application.
@@ -15,8 +15,10 @@ export const LocalSettingsDefaults = {
 };
 
 export const useLocalSettings = () => {
-  const storageOptions = React.useMemo(() => {
-    return {};
+  const storageOptions: StorageOptions<any> = React.useMemo(() => {
+    return {
+      prefix: 'ai-text-processor',
+    };
   }, []);
 
   return {
