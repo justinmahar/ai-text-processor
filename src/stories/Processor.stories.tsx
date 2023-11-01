@@ -7,21 +7,20 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 
-import { Example } from '../components/Example';
+import { Processor as ProcessorComponent } from '../components/Processor';
 
 export default {
-  title: 'Stories/Example',
-  component: Example,
-} as ComponentMeta<typeof Example>;
+  title: 'Utilities/AI Text Processor',
+  component: ProcessorComponent,
+  parameters: {
+    controls: {
+      disabled: true,
+    },
+    options: { showPanel: false },
+  },
+} as ComponentMeta<typeof ProcessorComponent>;
 
-const Template: ComponentStory<typeof Example> = (args) => <Example {...args} />;
+const Template: ComponentStory<typeof ProcessorComponent> = (args) => <ProcessorComponent {...args} />;
 
-export const Hello = Template.bind({});
-Hello.args = {
-  label: 'Hello',
-};
-
-export const World = Template.bind({});
-World.args = {
-  label: 'World',
-};
+export const Processor = Template.bind({});
+Processor.args = {};
