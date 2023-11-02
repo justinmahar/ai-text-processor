@@ -66,7 +66,19 @@ export const Processor = ({ ...props }: ProcessorProps) => {
     setXhr(xhr);
   };
 
-  const handleSave = () => {
+  const handleCleanUp = () => {
+    setInput(
+      input
+        .split(/\d+[:]\d+/)
+        .join(' ')
+        .split(/\n+/)
+        .join(' ')
+        .split(/\s\s+/)
+        .join(' '),
+    );
+  };
+
+  const handleSaveProcessor = () => {
     //
   };
 
@@ -143,8 +155,11 @@ export const Processor = ({ ...props }: ProcessorProps) => {
               <Button variant="primary" onClick={handleExecute}>
                 Execute
               </Button>
-              <Button variant="primary" onClick={handleSave}>
-                Save
+              <Button variant="outline-primary" onClick={handleCleanUp}>
+                Clean Up
+              </Button>
+              <Button variant="outline-primary" onClick={handleSaveProcessor}>
+                Save Processor
               </Button>
             </div>
           </div>
