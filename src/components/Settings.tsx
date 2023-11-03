@@ -18,6 +18,7 @@ export const Settings = ({ ...props }: SettingsProps) => {
   const [newOpenAiModelName, setNewOpenAiModelName] = React.useState('');
   const [newOpenAiModelId, setNewOpenAiModelId] = React.useState('');
   const [newOpenAiModelMaxTokens, setNewOpenAiModelMaxTokens] = React.useState('');
+  const [newOpenAiModelAvgTokenLength, setNewOpenAiModelAvgTokenLength] = React.useState('');
   const [averageTokenLength, setAverageTokenLength] = localSettings[LocalSettingsKeys.averageTokenLength];
   const [requestMaxTokenRatio, setRequestMaxTokenRatio] = localSettings[LocalSettingsKeys.requestMaxTokenRatio];
   const [chunkOverlapWordCount, setChunkOverlapWordCount] = localSettings[LocalSettingsKeys.chunkOverlapWordCount];
@@ -41,6 +42,7 @@ export const Settings = ({ ...props }: SettingsProps) => {
       name: newOpenAiModelName,
       id: newOpenAiModelId,
       maxTokens: parseInt(newOpenAiModelMaxTokens),
+      avgTokenLength: parseFloat(newOpenAiModelAvgTokenLength),
     });
     setCustomOpenAiModels(newCustomOpenAiModels);
     setNewOpenAiModelName('');
@@ -48,36 +50,18 @@ export const Settings = ({ ...props }: SettingsProps) => {
     setNewOpenAiModelMaxTokens('');
   };
 
-  const handleEditOpenAiModel = (id: string, prop: string, value: string) => {
-    const newCustomOpenAiModels: AIModel[] = [...(customOpenAiModels ?? [])];
-    const index = newCustomOpenAiModels.findIndex((m: AIModel) => m.id === id);
-    if (index >= 0) {
-      const model = newCustomOpenAiModels[index];
-      (model as any)[prop] = value;
-      newCustomOpenAiModels.splice(index, 1, model);
-      setCustomOpenAiModels(newCustomOpenAiModels);
-      setRenderTime(Date.now());
-    }
-  };
-
   const aiModelElements = mergedOpenAiModels.map((model, i) => {
     const disabled = !(customOpenAiModels ?? []).find((m: AIModel) => m.id === model.id);
     return (
       <div key={`model-${i}`} className="d-flex align-items-center gap-1">
-        <Form.Control
-          type="text"
-          placeholder="Name"
-          value={model.name}
-          disabled={disabled}
-          onChange={(e) => handleEditOpenAiModel(model.id, 'name', e.target.value)}
-        />
+        <Form.Control type="text" placeholder="Name" value={model.name} disabled={true} readOnly />
         <Form.Control
           type="text"
           placeholder="Model ID"
           className="font-monospace"
           value={model.id}
-          disabled={disabled}
-          onChange={(e) => handleEditOpenAiModel(model.id, 'id', e.target.value)}
+          disabled={true}
+          readOnly
         />
         <Form.Control
           type="number"
@@ -85,9 +69,18 @@ export const Settings = ({ ...props }: SettingsProps) => {
           step={1}
           placeholder="Max Tokens"
           value={model.maxTokens}
-          disabled={disabled}
-          onChange={(e) => handleEditOpenAiModel(model.id, 'maxTokens', e.target.value)}
+          disabled={true}
           style={{ width: 150 }}
+        />
+        <Form.Control
+          type="number"
+          min={1}
+          step={0.5}
+          placeholder="Avg Len"
+          value={model.avgTokenLength}
+          disabled={true}
+          readOnly
+          style={{ width: 80 }}
         />
         <Button variant="outline-danger" disabled={disabled} onClick={() => handleDeleteOpenAiModel(model.id)}>
           <FaTrashAlt />
@@ -162,6 +155,15 @@ export const Settings = ({ ...props }: SettingsProps) => {
                         value={newOpenAiModelMaxTokens}
                         onChange={(e) => setNewOpenAiModelMaxTokens(e.target.value)}
                         style={{ width: 150 }}
+                      />
+                      <Form.Control
+                        type="number"
+                        min={1}
+                        step={0.5}
+                        placeholder="Avg Len"
+                        value={newOpenAiModelAvgTokenLength}
+                        onChange={(e) => setNewOpenAiModelAvgTokenLength(e.target.value)}
+                        style={{ width: 80 }}
                       />
                       <Button variant="outline-primary" onClick={handleAddNewOpenAiModel} disabled={!canAddOpenAiModel}>
                         <FaPlus />

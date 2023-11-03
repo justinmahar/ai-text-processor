@@ -261,17 +261,17 @@ export const Processor = ({ ...props }: ProcessorProps) => {
     );
   });
 
-  const canSave = !!processorName.trim();
-  const configured = !!openAiModel && !!userPrompt;
-  const canExecute = configured && !!input;
-
   const outputElements = (outputs ?? []).map((output, i) => {
     return (
-      <Alert key={`output-${i}`}>
+      <Alert key={`output-${i}`} variant="light" className="text-black">
         <Markdown>{output}</Markdown>
       </Alert>
     );
   });
+
+  const canSave = !!processorName.trim();
+  const configured = !!openAiModel && !!userPrompt;
+  const canExecute = configured && !!input;
 
   return (
     <div {...props} className={classNames('d-flex flex-column gap-3', props.className)} style={{ ...props.style }}>
@@ -427,7 +427,7 @@ export const Processor = ({ ...props }: ProcessorProps) => {
               </div>
             </div>
             {showChunkInspector && (
-              <Accordion defaultActiveKey="0">
+              <Accordion>
                 <Accordion.Item eventKey="0">
                   <Accordion.Header>
                     <div className="d-flex align-items-center gap-2">
