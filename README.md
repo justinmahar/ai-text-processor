@@ -2,7 +2,7 @@
   📖 AI Text Processor
 </h2>
 <h3 align="center">
-  Summarize and extract data from text using AI
+  Utility for processing text using AI. Summarize, analyze, extract, translate, format, and more! ✨
 </h3>
 <p align="center">
   <a href="https://badge.fury.io/js/ai-text-processor" target="_blank" rel="noopener noreferrer"><img src="https://badge.fury.io/js/ai-text-processor.svg" alt="npm Version" /></a>&nbsp;

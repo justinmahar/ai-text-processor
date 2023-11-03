@@ -2,7 +2,7 @@
   "name": "ai-text-processor",
   "version": "1.0.4",
   "author": "Justin Mahar <contact@justinmahar.com>",
-  "description": "A template to build, test, and share React components and hooks easily.",
+  "description": "Utility for processing text using AI. Summarize, analyze, extract, translate, format, and more! ✨",
   "homepage": "https://justinmahar.github.io/ai-text-processor/",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
