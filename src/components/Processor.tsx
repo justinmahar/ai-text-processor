@@ -316,10 +316,15 @@ export const Processor = ({ ...props }: ProcessorProps) => {
                 before using this utility.
               </Alert>
             )}
-            <Form.Select value={selectedPresetName} onChange={(e) => handleSelectPreset(e.target.value)}>
-              <option value="">✨ New Preset</option>
-              {presetOptionElements}
-            </Form.Select>
+            <Form.Group controlId="select-preset">
+              <Form.Select value={selectedPresetName} onChange={(e) => handleSelectPreset(e.target.value)}>
+                <option value="">✨ New Preset</option>
+                {presetOptionElements}
+              </Form.Select>
+              <Form.Text className="text-muted">
+                Select a preset, or choose New Preset to create a new one. Note that default presets cannot be deleted.
+              </Form.Text>
+            </Form.Group>
             <Accordion
               key={`accordion-${!selectedPresetName ? 'new' : 'saved'}`}
               defaultActiveKey={!selectedPresetName ? '1' : undefined}
