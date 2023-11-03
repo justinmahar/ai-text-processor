@@ -623,6 +623,12 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
         </div>
       )}
       {errorAlertElements}
+      {(outputs ?? [])?.length > 0 && (
+        <h5 className="text-center text-muted">
+          If this project helped you, please{' '}
+          <a href="https://github.com/justinmahar/ai-text-processor/">Star it on GitHub</a> so others can find it. :)
+        </h5>
+      )}
     </div>
   );
 };
