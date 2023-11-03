@@ -1,6 +1,6 @@
 {
   "name": "ai-text-processor",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "Justin Mahar <contact@justinmahar.com>",
   "description": "A template to build, test, and share React components and hooks easily.",
   "homepage": "https://justinmahar.github.io/ai-text-processor/",
