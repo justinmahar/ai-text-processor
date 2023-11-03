@@ -1,12 +1,13 @@
 export class TextUtils {
-  public static scrubText(text: string) {
+  public static shrinkText(text: string) {
     return text
       .split(/\d+[:]\d+/)
       .join(' ')
       .split(/\n+/)
       .join(' ')
       .split(/\s\s+/)
-      .join(' ');
+      .join(' ')
+      .trim();
   }
 
   public static getEstimatedTokenCount(text: string, averageTokenLength = 4) {

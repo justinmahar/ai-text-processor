@@ -17,10 +17,6 @@ export const Settings = ({ ...props }: SettingsProps) => {
   const [newOpenAiModelName, setNewOpenAiModelName] = React.useState('');
   const [newOpenAiModelId, setNewOpenAiModelId] = React.useState('');
   const [newOpenAiModelMaxTokens, setNewOpenAiModelMaxTokens] = React.useState('');
-  const [averageTokenLength, setAverageTokenLength] = localSettings[LocalSettingsKeys.averageTokenLength];
-  const [requestMaxTokenRatio, setRequestMaxTokenRatio] = localSettings[LocalSettingsKeys.requestMaxTokenRatio];
-  const [chunkOverlapWordCount, setChunkOverlapWordCount] = localSettings[LocalSettingsKeys.chunkOverlapWordCount];
-  const [chunkPrefix, setChunkPrefix] = localSettings[LocalSettingsKeys.chunkPrefix];
   const [showChunkInspector, setShowChunkInspector] = localSettings[LocalSettingsKeys.showChunkInspector];
 
   const mergedOpenAiModels: AIModel[] = [...defaultOpenAiModels, ...(customOpenAiModels ?? [])];

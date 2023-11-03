@@ -1,6 +1,7 @@
 import React from 'react';
 import { StorageOptions, useLocalStorage } from 'react-storage-complete';
 import { AIModel, defaultOpenAiModels } from './open-ai-models';
+import { Preset, defaultPresets, defaultPresetsMap } from './Preset';
 
 /**
  * Local settings for the application.
@@ -8,10 +9,10 @@ import { AIModel, defaultOpenAiModels } from './open-ai-models';
 export enum LocalSettingsKeys {
   templateState = 'templateState',
   openAiKey = 'openAiKey',
-  processors = 'processors',
-  selectedProcessorName = 'selectedProcessorName',
+  presets = 'presets',
+  selectedPresetName = 'selectedPresetName',
   customOpenAiModels = 'customOpenAiModels',
-  processorName = 'processorName',
+  presetName = 'presetName',
   openAiModel = 'openAiModel',
   systemPrompt = 'systemPrompt',
   userPrompt = 'userPrompt',
@@ -23,16 +24,16 @@ export enum LocalSettingsKeys {
   chunkOverlapWordCount = 'chunkOverlapWordCount',
   chunkPrefix = 'chunkPrefix',
   showChunkInspector = 'showChunkInspector',
-  autoScrubEnabled = 'autoScrubEnabled',
+  autoShrinkEnabled = 'autoShrinkEnabled',
 }
 
 export const LocalSettingsDefaults = {
   [LocalSettingsKeys.templateState]: false,
   [LocalSettingsKeys.openAiKey]: '',
-  [LocalSettingsKeys.processors]: [] as Record<string, any>,
-  [LocalSettingsKeys.selectedProcessorName]: '',
+  [LocalSettingsKeys.presets]: defaultPresetsMap,
+  [LocalSettingsKeys.selectedPresetName]: '',
   [LocalSettingsKeys.customOpenAiModels]: [] as AIModel[],
-  [LocalSettingsKeys.processorName]: '',
+  [LocalSettingsKeys.presetName]: '',
   [LocalSettingsKeys.openAiModel]: defaultOpenAiModels[0].id,
   [LocalSettingsKeys.systemPrompt]: 'You are a helpful assistant.',
   [LocalSettingsKeys.userPrompt]: '',
@@ -44,7 +45,7 @@ export const LocalSettingsDefaults = {
   [LocalSettingsKeys.chunkOverlapWordCount]: 20,
   [LocalSettingsKeys.chunkPrefix]: '',
   [LocalSettingsKeys.showChunkInspector]: false,
-  [LocalSettingsKeys.autoScrubEnabled]: false,
+  [LocalSettingsKeys.autoShrinkEnabled]: false,
 };
 
 export const useLocalSettings = () => {
@@ -65,14 +66,14 @@ export const useLocalSettings = () => {
       LocalSettingsDefaults[LocalSettingsKeys.openAiKey],
       storageOptions,
     ),
-    [LocalSettingsKeys.processors]: useLocalStorage<Record<string, TextProcessor>>(
-      LocalSettingsKeys.processors,
-      LocalSettingsDefaults[LocalSettingsKeys.processors],
+    [LocalSettingsKeys.presets]: useLocalStorage<Record<string, Preset>>(
+      LocalSettingsKeys.presets,
+      LocalSettingsDefaults[LocalSettingsKeys.presets],
       storageOptions,
     ),
-    [LocalSettingsKeys.selectedProcessorName]: useLocalStorage(
-      LocalSettingsKeys.selectedProcessorName,
-      LocalSettingsDefaults[LocalSettingsKeys.selectedProcessorName],
+    [LocalSettingsKeys.selectedPresetName]: useLocalStorage(
+      LocalSettingsKeys.selectedPresetName,
+      LocalSettingsDefaults[LocalSettingsKeys.selectedPresetName],
       storageOptions,
     ),
     [LocalSettingsKeys.customOpenAiModels]: useLocalStorage<AIModel[]>(
@@ -80,9 +81,9 @@ export const useLocalSettings = () => {
       LocalSettingsDefaults[LocalSettingsKeys.customOpenAiModels],
       storageOptions,
     ),
-    [LocalSettingsKeys.processorName]: useLocalStorage(
-      LocalSettingsKeys.processorName,
-      LocalSettingsDefaults[LocalSettingsKeys.processorName],
+    [LocalSettingsKeys.presetName]: useLocalStorage(
+      LocalSettingsKeys.presetName,
+      LocalSettingsDefaults[LocalSettingsKeys.presetName],
       storageOptions,
     ),
     [LocalSettingsKeys.openAiModel]: useLocalStorage(
@@ -140,23 +141,12 @@ export const useLocalSettings = () => {
       LocalSettingsDefaults[LocalSettingsKeys.showChunkInspector],
       storageOptions,
     ),
-    [LocalSettingsKeys.autoScrubEnabled]: useLocalStorage(
-      LocalSettingsKeys.autoScrubEnabled,
-      LocalSettingsDefaults[LocalSettingsKeys.autoScrubEnabled],
+    [LocalSettingsKeys.autoShrinkEnabled]: useLocalStorage(
+      LocalSettingsKeys.autoShrinkEnabled,
+      LocalSettingsDefaults[LocalSettingsKeys.autoShrinkEnabled],
       storageOptions,
     ),
   };
 };
 
 export type LocalSettingsType = ReturnType<typeof useLocalSettings>;
-
-export interface TextProcessor {
-  name: string;
-  aiModel: string;
-  systemPrompt: string;
-  userPrompt: string;
-  averageTokenLength: number;
-  requestMaxTokenRatio: number;
-  chunkOverlapWordCount: number;
-  chunkPrefix: string;
-}

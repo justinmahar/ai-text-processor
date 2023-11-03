@@ -20,14 +20,15 @@ import { useMomentaryBool } from 'react-use-precision-timer';
 import { Markdown } from './Markdown';
 import { AIModel, defaultOpenAiModels } from './open-ai-models';
 import { TextUtils } from './TextUtils';
-import { LocalSettingsDefaults, LocalSettingsKeys, TextProcessor, useLocalSettings } from './useLocalSettings';
+import { LocalSettingsDefaults, LocalSettingsKeys, useLocalSettings } from './useLocalSettings';
+import { Preset } from './Preset';
 
 export interface ProcessorProps extends DivProps {}
 
 export const Processor = ({ ...props }: ProcessorProps) => {
   const localSettings = useLocalSettings();
-  const [processors, setProcessors] = localSettings[LocalSettingsKeys.processors];
-  const [processorName, setProcessorName] = localSettings[LocalSettingsKeys.processorName];
+  const [presets, setPresets] = localSettings[LocalSettingsKeys.presets];
+  const [presetName, setPresetName] = localSettings[LocalSettingsKeys.presetName];
   const [openAiModel, setOpenAiModel] = localSettings[LocalSettingsKeys.openAiModel];
   const [systemPrompt, setSystemPrompt] = localSettings[LocalSettingsKeys.systemPrompt];
   const [userPrompt, setUserPrompt] = localSettings[LocalSettingsKeys.userPrompt];
@@ -41,13 +42,13 @@ export const Processor = ({ ...props }: ProcessorProps) => {
   const [xhr, setXhr] = React.useState<XMLHttpRequest | undefined>(undefined);
   const errorsRef = React.useRef<any[]>([]);
   const [renderTime, setRenderTime] = React.useState(0);
-  const [selectedProcessorName, setSelectedProcessorName] = localSettings[LocalSettingsKeys.selectedProcessorName];
+  const [selectedPresetName, setSelectedPresetName] = localSettings[LocalSettingsKeys.selectedPresetName];
   const [averageTokenLength, setAverageTokenLength] = localSettings[LocalSettingsKeys.averageTokenLength];
   const [requestMaxTokenRatio, setRequestMaxTokenRatio] = localSettings[LocalSettingsKeys.requestMaxTokenRatio];
   const [chunkOverlapWordCount, setChunkOverlapWordCount] = localSettings[LocalSettingsKeys.chunkOverlapWordCount];
   const [chunkPrefix, setChunkPrefix] = localSettings[LocalSettingsKeys.chunkPrefix];
   const [showChunkInspector] = localSettings[LocalSettingsKeys.showChunkInspector];
-  const [autoScrubEnabled, setAutoScrubEnabled] = localSettings[LocalSettingsKeys.autoScrubEnabled];
+  const [autoShrinkEnabled, setAutoShrinkEnabled] = localSettings[LocalSettingsKeys.autoShrinkEnabled];
   const currentOpenAiModelInfo = mergedOpenAiModels.find((m) => m.id === openAiModel);
   const [currentChunkIndex, setCurrentChunkIndex] = React.useState(-1);
   const processingRef = React.useRef(false);
@@ -140,14 +141,14 @@ export const Processor = ({ ...props }: ProcessorProps) => {
     setInput('');
   };
 
-  const handleScrub = () => {
-    setInput(TextUtils.scrubText(input));
+  const handleShrink = () => {
+    setInput(TextUtils.shrinkText(input));
   };
 
-  const handleSelectProcessor = (processorName: string) => {
-    if (!processorName) {
-      setSelectedProcessorName('');
-      setProcessorName(LocalSettingsDefaults[LocalSettingsKeys.processorName]);
+  const handleSelectPreset = (presetName: string) => {
+    if (!presetName) {
+      setSelectedPresetName('');
+      setPresetName(LocalSettingsDefaults[LocalSettingsKeys.presetName]);
       setOpenAiModel(LocalSettingsDefaults[LocalSettingsKeys.openAiModel]);
       setSystemPrompt(LocalSettingsDefaults[LocalSettingsKeys.systemPrompt]);
       setUserPrompt(LocalSettingsDefaults[LocalSettingsKeys.userPrompt]);
@@ -155,32 +156,34 @@ export const Processor = ({ ...props }: ProcessorProps) => {
       setRequestMaxTokenRatio(LocalSettingsDefaults[LocalSettingsKeys.requestMaxTokenRatio]);
       setChunkOverlapWordCount(LocalSettingsDefaults[LocalSettingsKeys.chunkOverlapWordCount]);
       setChunkPrefix(LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
+      setAutoShrinkEnabled(LocalSettingsDefaults[LocalSettingsKeys.autoShrinkEnabled]);
     } else {
-      const selectedProcessor = (processors ?? {})[processorName];
-      if (selectedProcessor) {
-        setSelectedProcessorName(processorName);
-        setProcessorName(selectedProcessor.name ?? LocalSettingsDefaults[LocalSettingsKeys.processorName]);
-        setOpenAiModel(selectedProcessor.aiModel ?? LocalSettingsDefaults[LocalSettingsKeys.openAiModel]);
-        setSystemPrompt(selectedProcessor.systemPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.systemPrompt]);
-        setUserPrompt(selectedProcessor.userPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.userPrompt]);
+      const selectedPreset = (presets ?? {})[presetName];
+      if (selectedPreset) {
+        setSelectedPresetName(presetName);
+        setPresetName(selectedPreset.name ?? LocalSettingsDefaults[LocalSettingsKeys.presetName]);
+        setOpenAiModel(selectedPreset.aiModel ?? LocalSettingsDefaults[LocalSettingsKeys.openAiModel]);
+        setSystemPrompt(selectedPreset.systemPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.systemPrompt]);
+        setUserPrompt(selectedPreset.userPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.userPrompt]);
         setAverageTokenLength(
-          selectedProcessor.averageTokenLength ?? LocalSettingsDefaults[LocalSettingsKeys.averageTokenLength],
+          selectedPreset.averageTokenLength ?? LocalSettingsDefaults[LocalSettingsKeys.averageTokenLength],
         );
         setRequestMaxTokenRatio(
-          selectedProcessor.requestMaxTokenRatio ?? LocalSettingsDefaults[LocalSettingsKeys.requestMaxTokenRatio],
+          selectedPreset.requestMaxTokenRatio ?? LocalSettingsDefaults[LocalSettingsKeys.requestMaxTokenRatio],
         );
         setChunkOverlapWordCount(
-          selectedProcessor.chunkOverlapWordCount ?? LocalSettingsDefaults[LocalSettingsKeys.chunkOverlapWordCount],
+          selectedPreset.chunkOverlapWordCount ?? LocalSettingsDefaults[LocalSettingsKeys.chunkOverlapWordCount],
         );
-        setChunkPrefix(selectedProcessor.chunkPrefix ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
+        setChunkPrefix(selectedPreset.chunkPrefix ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
+        setAutoShrinkEnabled(selectedPreset.autoShrink ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
         inputTextFieldRef.current?.select();
       }
     }
   };
 
-  const handleSaveProcessor = () => {
-    const processorToSave: TextProcessor = {
-      name: processorName,
+  const handleSavePreset = () => {
+    const presetToSave: Preset = {
+      name: presetName,
       aiModel: openAiModel,
       systemPrompt: systemPrompt,
       userPrompt: userPrompt,
@@ -188,26 +191,27 @@ export const Processor = ({ ...props }: ProcessorProps) => {
       requestMaxTokenRatio,
       chunkOverlapWordCount,
       chunkPrefix,
+      autoShrink: !!autoShrinkEnabled,
     };
-    const newProcessors: Record<string, any> = { ...(processors ?? {}), [processorToSave.name]: processorToSave };
-    const newProcessorsSorted: Record<string, any> = {};
-    Object.keys(newProcessors)
-      .sort((a, b) => a.localeCompare(b))
+    const newPresets: Record<string, any> = { ...(presets ?? {}), [presetToSave.name]: presetToSave };
+    const newPresetsSorted: Record<string, any> = {};
+    Object.keys(newPresets)
+      .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
       .forEach((key) => {
-        newProcessorsSorted[key] = newProcessors[key];
+        newPresetsSorted[key] = newPresets[key];
       });
-    setProcessors(newProcessorsSorted);
-    setSelectedProcessorName(processorName);
+    setPresets(newPresetsSorted);
+    setSelectedPresetName(presetName);
     setRenderTime(Date.now());
   };
 
-  const handleDeleteProcessor = () => {
-    if (selectedProcessorName) {
-      const newProcessors = { ...(processors ?? {}) };
-      delete newProcessors[selectedProcessorName];
-      setProcessors(newProcessors);
+  const handleDeletePreset = () => {
+    if (selectedPresetName) {
+      const newPresets = { ...(presets ?? {}) };
+      delete newPresets[selectedPresetName];
+      setPresets(newPresets);
     }
-    handleSelectProcessor('');
+    handleSelectPreset('');
   };
 
   const handleCopy = () => {
@@ -252,11 +256,12 @@ export const Processor = ({ ...props }: ProcessorProps) => {
     );
   });
 
-  const processorKeys = Object.keys(processors ?? {});
-  const processorOptionElements: JSX.Element[] = processorKeys.map((processorKey) => {
+  const presetKeys = Object.keys(presets ?? {});
+  const presetOptionElements: JSX.Element[] = presetKeys.map((presetKey) => {
+    const preset = (presets ?? {})[presetKey];
     return (
-      <option key={`${processorKey}`} value={processorKey}>
-        {processorKey}
+      <option key={`${presetKey}`} value={presetKey}>
+        {presetKey} ({mergedOpenAiModels.find((m) => m.id === preset.aiModel)?.name ?? preset.aiModel})
       </option>
     );
   });
@@ -293,9 +298,22 @@ export const Processor = ({ ...props }: ProcessorProps) => {
     );
   });
 
-  const canSave = !!processorName.trim();
+  const selectedPreset = (presets ?? {})[selectedPresetName];
+  const hasChanges =
+    !selectedPreset ||
+    (selectedPreset && selectedPreset.name !== presetName) ||
+    selectedPreset.aiModel !== openAiModel ||
+    selectedPreset.systemPrompt !== systemPrompt ||
+    selectedPreset.userPrompt !== userPrompt ||
+    selectedPreset.averageTokenLength !== averageTokenLength ||
+    selectedPreset.requestMaxTokenRatio !== requestMaxTokenRatio ||
+    selectedPreset.chunkOverlapWordCount !== chunkOverlapWordCount ||
+    selectedPreset.chunkPrefix !== chunkPrefix ||
+    !!selectedPreset.autoShrink !== !!autoShrinkEnabled;
+  const canSave = !!presetName.trim() && hasChanges;
   const configured = !!openAiModel && !!userPrompt;
   const canExecute = configured && !!input;
+  const hasInput = (input ?? '').length > 0;
 
   return (
     <div {...props} className={classNames('d-flex flex-column gap-3', props.className)} style={{ ...props.style }}>
@@ -312,18 +330,19 @@ export const Processor = ({ ...props }: ProcessorProps) => {
                 before using this utility.
               </Alert>
             )}
-            <Form.Select value={selectedProcessorName} onChange={(e) => handleSelectProcessor(e.target.value)}>
-              <option value="">New Processor</option>
-              {processorOptionElements}
+            <Form.Select value={selectedPresetName} onChange={(e) => handleSelectPreset(e.target.value)}>
+              <option value="">✨ New Preset</option>
+              {presetOptionElements}
             </Form.Select>
             <Accordion
-              key={`accordion-${!selectedProcessorName ? 'new' : 'saved'}`}
-              defaultActiveKey={!selectedProcessorName ? '1' : undefined}
+              key={`accordion-${!selectedPresetName ? 'new' : 'saved'}`}
+              defaultActiveKey={!selectedPresetName ? '1' : undefined}
             >
               <Accordion.Item eventKey="1">
                 <Accordion.Header>
                   <div className="d-flex align-items-center gap-2">
-                    {!configured ? <FaWrench /> : <FaCheckSquare className="text-success" />} Processor Configuration
+                    {!configured ? <FaWrench /> : <FaCheckSquare className="text-success" />} Preset Configuration
+                    {canSave && <Badge bg="primary">Unsaved</Badge>}
                   </div>
                 </Accordion.Header>
                 <Accordion.Body className="d-flex flex-column gap-2">
@@ -331,11 +350,11 @@ export const Processor = ({ ...props }: ProcessorProps) => {
                     <Form.Label className="small fw-bold mb-1">Name</Form.Label>
                     <Form.Control
                       type="text"
-                      placeholder="Enter a processor name"
-                      value={processorName}
-                      onChange={(e) => setProcessorName(e.target.value)}
+                      placeholder="Enter a preset name"
+                      value={presetName}
+                      onChange={(e) => setPresetName(e.target.value)}
                     />
-                    <Form.Text className="text-muted">Provide a name for this processor.</Form.Text>
+                    <Form.Text className="text-muted">Provide a name for this preset.</Form.Text>
                   </Form.Group>
                   <Form.Group controlId="model-group">
                     <Form.Label className="small fw-bold mb-1">AI Model</Form.Label>
@@ -386,7 +405,7 @@ export const Processor = ({ ...props }: ProcessorProps) => {
                       </div>
                     </div>
                   </Form.Group>
-                  <Accordion defaultActiveKey="0">
+                  <Accordion>
                     <Accordion.Item eventKey="0">
                       <Accordion.Header>Advanced Config</Accordion.Header>
                       <Accordion.Body>
@@ -454,14 +473,27 @@ export const Processor = ({ ...props }: ProcessorProps) => {
                             When chunking, subsequent chunks will be prefixed with this text to indicate a continuation.
                           </Form.Text>
                         </Form.Group>
+                        <Form.Group controlId="form-group-auto-shrink" className="mt-3">
+                          <Form.Check
+                            label="Auto-shrink"
+                            className="user-select-none small mb-0"
+                            id="auto-shrink-checkbox"
+                            checked={!!autoShrinkEnabled}
+                            onChange={(e) => setAutoShrinkEnabled(e.target.checked)}
+                          />
+                          <Form.Text className="text-muted">
+                            Shrinking condenses whitespace and removes timestamps (in the format #:#) to shorten the
+                            input.
+                          </Form.Text>
+                        </Form.Group>
                       </Accordion.Body>
                     </Accordion.Item>
                   </Accordion>
                   <div className="d-flex justify-content-end gap-2">
-                    <Button variant="outline-primary" onClick={handleSaveProcessor} disabled={!canSave}>
+                    <Button variant="outline-primary" onClick={handleSavePreset} disabled={!canSave}>
                       <FaSave className="mb-1" />
                     </Button>
-                    <Button variant="outline-danger" onClick={handleDeleteProcessor}>
+                    <Button variant="outline-danger" onClick={handleDeletePreset}>
                       <FaTrashAlt className="mb-1" />
                     </Button>
                   </div>
@@ -477,8 +509,8 @@ export const Processor = ({ ...props }: ProcessorProps) => {
                 rows={8}
                 value={input}
                 onChange={(e) => {
-                  if (autoScrubEnabled) {
-                    setInput(TextUtils.scrubText(e.target.value));
+                  if (autoShrinkEnabled) {
+                    setInput(TextUtils.shrinkText(e.target.value));
                   } else {
                     setInput(e.target.value);
                   }
@@ -488,22 +520,19 @@ export const Processor = ({ ...props }: ProcessorProps) => {
             </Form.Group>
             <div className="d-flex justify-content-between align-items-start gap-2">
               <div className="d-flex align-items-center gap-2">
-                <Button variant="outline-danger" size="sm" onClick={handleClearInput}>
+                <Button variant="outline-danger" size="sm" onClick={handleClearInput} disabled={!hasInput}>
                   Clear
                 </Button>
-                <Button variant="outline-primary" size="sm" onClick={handleScrub}>
-                  <div className="d-flex align-items-center gap-1">
-                    <FaSoap />
-                    Scrub
-                  </div>
+                <Button variant="outline-primary" size="sm" onClick={handleShrink} disabled={!hasInput}>
+                  <div className="d-flex align-items-center gap-1">Shrink</div>
                 </Button>
                 <Form.Check
                   inline
-                  label="Auto-scrub"
+                  label="Auto-shrink"
                   className="user-select-none small mb-0"
-                  id="auto-scrub-checkbox"
-                  checked={!!autoScrubEnabled}
-                  onChange={(e) => setAutoScrubEnabled(e.target.checked)}
+                  id="auto-shrink-checkbox"
+                  checked={!!autoShrinkEnabled}
+                  onChange={(e) => setAutoShrinkEnabled(e.target.checked)}
                 />
               </div>
               <div className="d-flex align-items-center gap-2">
