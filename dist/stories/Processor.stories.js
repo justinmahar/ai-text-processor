@@ -11,10 +11,10 @@ exports.Processor = void 0;
  * More on argTypes: https://storybook.js.org/docs/react/api/argtypes
  */
 const react_1 = __importDefault(require("react"));
-const Processor_1 = require("../components/Processor");
+const AITextProcessor_1 = require("../components/AITextProcessor");
 exports.default = {
     title: 'Utilities/AI Text Processor',
-    component: Processor_1.Processor,
+    component: AITextProcessor_1.AITextProcessor,
     parameters: {
         controls: {
             disabled: true,
@@ -22,6 +22,6 @@ exports.default = {
         options: { showPanel: false },
     },
 };
-const Template = (args) => react_1.default.createElement(Processor_1.Processor, Object.assign({}, args));
+const Template = (args) => react_1.default.createElement(AITextProcessor_1.AITextProcessor, Object.assign({}, args));
 exports.Processor = Template.bind({});
 exports.Processor.args = {};

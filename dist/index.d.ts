@@ -1,2 +1,1 @@
-export * from './components/Processor';
-export * from './components/Settings';
+export * from './components/TextUtils';
