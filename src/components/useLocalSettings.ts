@@ -42,7 +42,7 @@ export const LocalSettingsDefaults = {
   [LocalSettingsKeys.averageTokenLength]: 4.5,
   [LocalSettingsKeys.requestMaxTokenRatio]: 0.6,
   [LocalSettingsKeys.chunkOverlapWordCount]: 20,
-  [LocalSettingsKeys.chunkPrefix]: '(continued...) ',
+  [LocalSettingsKeys.chunkPrefix]: '',
   [LocalSettingsKeys.showChunkInspector]: false,
   [LocalSettingsKeys.autoScrubEnabled]: false,
 };
