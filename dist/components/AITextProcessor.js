@@ -342,15 +342,17 @@ const AITextProcessor = (_a) => {
             .join(' ');
         const currVarOpts = Array.isArray(variableOptions[variable]) ? variableOptions[variable] : [];
         const currValueOptionElements = currVarOpts.map((varValue, j) => (react_1.default.createElement("option", { key: `var-${i}-opt-${j}`, value: varValue }, varValue)));
+        const canAddVariableOption = !!currVarValue && !currVarOpts.includes(currVarValue);
+        const canDeleteVariableOption = !!currVarValue;
         return (react_1.default.createElement("div", { key: `variable-${i}`, className: "d-flex gap-1 mb-1" },
             react_1.default.createElement(react_bootstrap_1.Form.Control, { size: "sm", type: "text", disabled: true, value: currVarName, style: { width: 150 } }),
             react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", size: "sm", placeholder: "Value", value: currVarValue, onChange: (e) => handleSetVariableValue(variable, e.target.value), style: { width: 150 } }),
-            react_1.default.createElement(react_bootstrap_1.Form.Select, { size: "sm", value: currVarValue, onChange: (e) => handleSetVariableValue(variable, e.target.value), style: { width: 0 } },
+            react_1.default.createElement(react_bootstrap_1.Form.Select, { size: "sm", value: currVarValue, onChange: (e) => handleSetVariableValue(variable, e.target.value), style: { width: 20 } },
                 react_1.default.createElement("option", { value: "" }),
                 currValueOptionElements),
-            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", size: "sm", onClick: () => handleAddVariableOption(variable, currVarValue) },
+            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", size: "sm", onClick: () => handleAddVariableOption(variable, currVarValue), disabled: !canAddVariableOption },
                 react_1.default.createElement(fa_1.FaPlus, { className: "mb-1" })),
-            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", size: "sm", onClick: () => handleDeleteVariableOption(variable, currVarValue) },
+            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", size: "sm", onClick: () => handleDeleteVariableOption(variable, currVarValue), disabled: !canDeleteVariableOption },
                 react_1.default.createElement(fa_1.FaTrashAlt, { className: "mb-1" }))));
     });
     const showProcessingAlert = processingRef.current && ((outputs !== null && outputs !== void 0 ? outputs : []).length < currentChunkIndex + 1 || retryingRef.current);
