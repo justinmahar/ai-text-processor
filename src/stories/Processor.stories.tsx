@@ -7,7 +7,7 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 
-import { Processor as ProcessorComponent } from '../components/Processor';
+import { AITextProcessor as ProcessorComponent } from '../components/AITextProcessor';
 
 export default {
   title: 'Utilities/AI Text Processor',

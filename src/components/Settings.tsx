@@ -5,7 +5,7 @@ import { Alert, Button, Card, Form } from 'react-bootstrap';
 import { DivProps } from 'react-html-props';
 import { FaEye, FaEyeSlash, FaPlus, FaTrashAlt } from 'react-icons/fa';
 import { LocalSettingsKeys, useLocalSettings } from './useLocalSettings';
-import { AIModel, defaultOpenAiModels } from './open-ai-models';
+import { AIModelInfo, defaultOpenAiModelInfos } from './AIModelInfo';
 import { ImportExportModal } from './ImportExportModal';
 
 export interface SettingsProps extends DivProps {}
@@ -14,39 +14,39 @@ export const Settings = ({ ...props }: SettingsProps) => {
   const localSettings = useLocalSettings();
   const [openAiKey, setOpenAiKey] = localSettings[LocalSettingsKeys.openAiKey];
   const [showOpenAiKey, setShowOpenAiKey] = React.useState(false);
-  const [customOpenAiModels, setCustomOpenAiModels] = localSettings[LocalSettingsKeys.customOpenAiModels];
+  const [customOpenAiModelInfos, setCustomOpenAiModelInfos] = localSettings[LocalSettingsKeys.customOpenAiModelInfos];
   const [newOpenAiModelName, setNewOpenAiModelName] = React.useState('');
   const [newOpenAiModelId, setNewOpenAiModelId] = React.useState('');
   const [newOpenAiModelMaxTokens, setNewOpenAiModelMaxTokens] = React.useState('');
   const [showChunkInspector, setShowChunkInspector] = localSettings[LocalSettingsKeys.showChunkInspector];
   const [showImportExportModal, setShowImportExportModal] = React.useState(false);
 
-  const mergedOpenAiModels: AIModel[] = [...defaultOpenAiModels, ...(customOpenAiModels ?? [])];
+  const mergedOpenAiModelInfos: AIModelInfo[] = [...defaultOpenAiModelInfos, ...(customOpenAiModelInfos ?? [])];
 
   const handleDeleteOpenAiModel = (id: string) => {
-    const newCustomOpenAiModels = [...(customOpenAiModels ?? [])];
-    const index = newCustomOpenAiModels.findIndex((m: AIModel) => m.id === id);
+    const newCustomOpenAiModels = [...(customOpenAiModelInfos ?? [])];
+    const index = newCustomOpenAiModels.findIndex((m: AIModelInfo) => m.id === id);
     if (index >= 0) {
       newCustomOpenAiModels.splice(index, 1);
-      setCustomOpenAiModels(newCustomOpenAiModels);
+      setCustomOpenAiModelInfos(newCustomOpenAiModels);
     }
   };
 
   const handleAddNewOpenAiModel = () => {
-    const newCustomOpenAiModels: AIModel[] = [...(customOpenAiModels ?? [])];
+    const newCustomOpenAiModels: AIModelInfo[] = [...(customOpenAiModelInfos ?? [])];
     newCustomOpenAiModels.push({
       name: newOpenAiModelName,
       id: newOpenAiModelId,
       maxTokens: parseInt(newOpenAiModelMaxTokens),
     });
-    setCustomOpenAiModels(newCustomOpenAiModels);
+    setCustomOpenAiModelInfos(newCustomOpenAiModels);
     setNewOpenAiModelName('');
     setNewOpenAiModelId('');
     setNewOpenAiModelMaxTokens('');
   };
 
-  const aiModelElements = mergedOpenAiModels.map((model, i) => {
-    const disabled = !(customOpenAiModels ?? []).find((m: AIModel) => m.id === model.id);
+  const aiModelElements = mergedOpenAiModelInfos.map((model, i) => {
+    const disabled = !(customOpenAiModelInfos ?? []).find((m: AIModelInfo) => m.id === model.id);
     return (
       <div key={`model-${i}`} className="d-flex align-items-center gap-1">
         <Form.Control type="text" placeholder="Name" value={model.name} disabled={true} readOnly />
@@ -75,7 +75,7 @@ export const Settings = ({ ...props }: SettingsProps) => {
   });
 
   const canAddOpenAiModel =
-    !mergedOpenAiModels.find((m) => m.id === newOpenAiModelId) &&
+    !mergedOpenAiModelInfos.find((m) => m.id === newOpenAiModelId) &&
     newOpenAiModelName &&
     newOpenAiModelId &&
     newOpenAiModelMaxTokens;
@@ -109,10 +109,11 @@ export const Settings = ({ ...props }: SettingsProps) => {
                     {!showOpenAiKey ? <FaEye className="mb-1" /> : <FaEyeSlash className="mb-1" />}
                   </Button>
                 </div>
+                <Form.Text className="text-muted">
+                  Your <a href="https://platform.openai.com/account/api-keys">API key</a> will be stored in your
+                  browser's local storage, on your device only (not in the cloud).
+                </Form.Text>
               </Form.Group>
-              <Form.Text className="text-muted">
-                Your API key will be stored in your browser's local storage, on your device only (not in the cloud).
-              </Form.Text>
               <Card>
                 <Card.Header>AI Models</Card.Header>
                 <Card.Body>

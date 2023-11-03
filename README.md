@@ -56,6 +56,7 @@ If this project helped you, please consider buying me a coffee. Your support is 
 - [Table of Contents](#table-of-contents)
 - [Quick Start](#quick-start)
 - [Use Cases](#use-cases)
+- [npm Package](#npm-package)
 - [TypeScript](#typescript)
 - [Icon Attribution](#icon-attribution)
 - [Contributing](#contributing)
@@ -79,6 +80,24 @@ This utility supports variety of use cases, including (but certainly not limited
 - **Text Formatting** - Format output text using specified criteria.
 
 One of the main features of this utility is the ability to save and reuse presets. This can significantly speed up your workflow.
+
+## npm Package
+
+This package is available on npm, should you want to use its text processing utilities in your own app.
+
+```bash
+npm i ai-text-processor
+```
+
+```js
+import { TextUtils } from `ai-text-processor`
+```
+
+Utility Functions:
+
+- `TextUtils.shrinkText` - Condense whitespace and remove timestamps (#:#)
+- `TextUtils.getEstimatedTokenCount` - Estimate the number of tokens in text
+- `TextUtils.getChunks` - Split text into chunks based on token limits
 
 ## TypeScript
 

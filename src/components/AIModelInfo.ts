@@ -1,10 +1,10 @@
-export interface AIModel {
+export interface AIModelInfo {
   name: string;
   id: string;
   maxTokens: number;
 }
 
-export const defaultOpenAiModels: AIModel[] = [
+export const defaultOpenAiModelInfos: AIModelInfo[] = [
   {
     id: 'gpt-3.5-turbo',
     name: 'GPT-3.5',

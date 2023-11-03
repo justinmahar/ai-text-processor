@@ -1,6 +1,6 @@
 import React from 'react';
 import { StorageOptions, useLocalStorage } from 'react-storage-complete';
-import { AIModel, defaultOpenAiModels } from './open-ai-models';
+import { AIModelInfo, defaultOpenAiModelInfos } from './AIModelInfo';
 import { Preset, defaultPresets, defaultPresetsMap } from './Preset';
 
 /**
@@ -11,7 +11,7 @@ export enum LocalSettingsKeys {
   openAiKey = 'openAiKey',
   presets = 'presets',
   selectedPresetName = 'selectedPresetName',
-  customOpenAiModels = 'customOpenAiModels',
+  customOpenAiModelInfos = 'customOpenAiModelInfos',
   presetName = 'presetName',
   openAiModel = 'openAiModel',
   systemPrompt = 'systemPrompt',
@@ -32,9 +32,9 @@ export const LocalSettingsDefaults = {
   [LocalSettingsKeys.openAiKey]: '',
   [LocalSettingsKeys.presets]: defaultPresetsMap,
   [LocalSettingsKeys.selectedPresetName]: '',
-  [LocalSettingsKeys.customOpenAiModels]: [] as AIModel[],
+  [LocalSettingsKeys.customOpenAiModelInfos]: [] as AIModelInfo[],
   [LocalSettingsKeys.presetName]: '',
-  [LocalSettingsKeys.openAiModel]: defaultOpenAiModels[0].id,
+  [LocalSettingsKeys.openAiModel]: defaultOpenAiModelInfos[0].id,
   [LocalSettingsKeys.systemPrompt]: 'You are a helpful assistant.',
   [LocalSettingsKeys.userPrompt]: '',
   [LocalSettingsKeys.input]: '',
@@ -76,9 +76,9 @@ export const useLocalSettings = () => {
       LocalSettingsDefaults[LocalSettingsKeys.selectedPresetName],
       storageOptions,
     ),
-    [LocalSettingsKeys.customOpenAiModels]: useLocalStorage<AIModel[]>(
-      LocalSettingsKeys.customOpenAiModels,
-      LocalSettingsDefaults[LocalSettingsKeys.customOpenAiModels],
+    [LocalSettingsKeys.customOpenAiModelInfos]: useLocalStorage<AIModelInfo[]>(
+      LocalSettingsKeys.customOpenAiModelInfos,
+      LocalSettingsDefaults[LocalSettingsKeys.customOpenAiModelInfos],
       storageOptions,
     ),
     [LocalSettingsKeys.presetName]: useLocalStorage(

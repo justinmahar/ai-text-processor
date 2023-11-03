@@ -13,7 +13,7 @@ export interface ImportExportModalProps extends ModalProps {
 export const ImportExportModal = ({ show, setShow, ...props }: ImportExportModalProps) => {
   const localSettings = useLocalSettings();
   const [presets, setPresets] = localSettings[LocalSettingsKeys.presets];
-  const [customOpenAiModels, setCustomOpenAiModels] = localSettings[LocalSettingsKeys.customOpenAiModels];
+  const [customOpenAiModels, setCustomOpenAiModels] = localSettings[LocalSettingsKeys.customOpenAiModelInfos];
   const enteredValueTextAreaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const getSettingsJsonString = () => {
     let settingsJson = '';

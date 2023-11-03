@@ -10,12 +10,12 @@ import { useMomentaryBool } from 'react-use-precision-timer';
 import { Markdown } from './Markdown';
 import { Preset, defaultPresetsMap, toSortedPresetsMap } from './Preset';
 import { TextUtils } from './TextUtils';
-import { AIModel, defaultOpenAiModels } from './open-ai-models';
+import { AIModelInfo, defaultOpenAiModelInfos } from './AIModelInfo';
 import { LocalSettingsDefaults, LocalSettingsKeys, useLocalSettings } from './useLocalSettings';
 
-export interface ProcessorProps extends DivProps {}
+export interface AITextProcessorProps extends DivProps {}
 
-export const Processor = ({ ...props }: ProcessorProps) => {
+export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const localSettings = useLocalSettings();
   const [presets, setPresets] = localSettings[LocalSettingsKeys.presets];
   const mergedPresets = toSortedPresetsMap([...Object.values(defaultPresetsMap), ...Object.values(presets ?? {})]);
@@ -26,8 +26,8 @@ export const Processor = ({ ...props }: ProcessorProps) => {
   const [input, setInput] = localSettings[LocalSettingsKeys.input];
   const [outputs, setOutputs] = localSettings[LocalSettingsKeys.outputs];
   const [openAiKey] = localSettings[LocalSettingsKeys.openAiKey];
-  const [customOpenAiModels] = localSettings[LocalSettingsKeys.customOpenAiModels];
-  const mergedOpenAiModels: AIModel[] = [...defaultOpenAiModels, ...(customOpenAiModels ?? [])];
+  const [customOpenAiModels] = localSettings[LocalSettingsKeys.customOpenAiModelInfos];
+  const mergedOpenAiModels: AIModelInfo[] = [...defaultOpenAiModelInfos, ...(customOpenAiModels ?? [])];
   const [showRawOutput, setShowRawOutput] = localSettings[LocalSettingsKeys.showRawOutput];
   const [copied, toggleCopied] = useMomentaryBool(false, 2000);
   const [xhr, setXhr] = React.useState<XMLHttpRequest | undefined>(undefined);
