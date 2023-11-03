@@ -29,7 +29,7 @@ Happy text processing!
 - **📖 Process Text With AI**
   - Quickly and easily process text using any of OpenAI's chat models.
 - **📒 Presets**
-  - Save presets to reuse prompts to speed up your workflow.
+  - Speed up your workflow by saving presets that let you reuse your prompts.
 - **✂️ Chunking**
   - Automatically split long inputs into chunks that leave token headroom for your desired output.
 - **⚙️ Configurable**
