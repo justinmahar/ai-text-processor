@@ -8,6 +8,8 @@ export interface Preset {
     chunkOverlapWordCount: number;
     chunkPrefix: string;
     autoShrink: boolean;
+    variableValues: Record<string, string>;
+    variableOptions: Record<string, string[]>;
 }
 export declare const defaultPresets: Preset[];
 export declare const toSortedPresetsMap: (presets: Preset[]) => Record<string, Preset>;

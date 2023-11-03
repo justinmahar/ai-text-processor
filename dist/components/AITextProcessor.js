@@ -30,7 +30,7 @@ const AIModelInfo_1 = require("./AIModelInfo");
 const useLocalSettings_1 = require("./useLocalSettings");
 exports.CHAR_LIMIT = 2000000;
 const AITextProcessor = (_a) => {
-    var _b, _c, _d, _e, _f, _g;
+    var _b, _c, _d, _e, _f, _g, _h;
     var props = __rest(_a, []);
     const localSettings = (0, useLocalSettings_1.useLocalSettings)();
     const [presets, setPresets] = localSettings[useLocalSettings_1.LocalSettingsKeys.presets];
@@ -39,6 +39,9 @@ const AITextProcessor = (_a) => {
     const [openAiModel, setOpenAiModel] = localSettings[useLocalSettings_1.LocalSettingsKeys.openAiModel];
     const [systemPrompt, setSystemPrompt] = localSettings[useLocalSettings_1.LocalSettingsKeys.systemPrompt];
     const [userPrompt, setUserPrompt] = localSettings[useLocalSettings_1.LocalSettingsKeys.userPrompt];
+    const variables = [...new Set((_b = `${systemPrompt}\n${userPrompt}`.match(/\{\{([\w_-]+)\}\}/g)) !== null && _b !== void 0 ? _b : [])];
+    const [variableValues, setVariableValues] = localSettings[useLocalSettings_1.LocalSettingsKeys.variableValues];
+    const [variableOptions, setVariableOptions] = localSettings[useLocalSettings_1.LocalSettingsKeys.variableOptions];
     const [input, setInput] = localSettings[useLocalSettings_1.LocalSettingsKeys.input];
     const [outputs, setOutputs] = localSettings[useLocalSettings_1.LocalSettingsKeys.outputs];
     const [openAiKey] = localSettings[useLocalSettings_1.LocalSettingsKeys.openAiKey];
@@ -62,7 +65,13 @@ const AITextProcessor = (_a) => {
     const outputsRef = react_1.default.useRef([]);
     const inputTextFieldRef = react_1.default.useRef(null);
     const retryingRef = react_1.default.useRef(false);
-    const chunks = TextUtils_1.TextUtils.getChunks(`${systemPrompt}`, `${userPrompt}`, `${input}`, (_b = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _b !== void 0 ? _b : 0, {
+    let preparedUserPrompt = userPrompt !== null && userPrompt !== void 0 ? userPrompt : '';
+    variables.forEach((variable) => {
+        var _a;
+        const replacement = (_a = variableValues[variable]) !== null && _a !== void 0 ? _a : '';
+        preparedUserPrompt = preparedUserPrompt.split(variable).join(replacement);
+    });
+    const chunks = TextUtils_1.TextUtils.getChunks(`${systemPrompt}`, `${preparedUserPrompt}`, `${input}`, (_c = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _c !== void 0 ? _c : 0, {
         averageTokenLength: averageTokenLength !== null && averageTokenLength !== void 0 ? averageTokenLength : 4,
         requestMaxTokenRatio: requestMaxTokenRatio !== null && requestMaxTokenRatio !== void 0 ? requestMaxTokenRatio : 0.6,
         chunkOverlapWordCount: chunkOverlapWordCount !== null && chunkOverlapWordCount !== void 0 ? chunkOverlapWordCount : 20,
@@ -106,7 +115,7 @@ const AITextProcessor = (_a) => {
             if (systemPrompt) {
                 messages.push({ role: 'system', content: systemPrompt });
             }
-            messages.push({ role: 'user', content: `${userPrompt}\n\n${chunk}`.trim() });
+            messages.push({ role: 'user', content: `${preparedUserPrompt}\n\n${chunk}`.trim() });
             // Make the call and store a reference to the XMLHttpRequest
             const xhr = openai_ext_1.OpenAIExt.streamClientChatCompletion({
                 model: `${openAiModel}`,
@@ -148,6 +157,29 @@ const AITextProcessor = (_a) => {
             processChunk(currentChunkIndex);
         }, 1000);
     };
+    const handleSetInput = (text) => {
+        if (autoShrinkEnabled) {
+            setInput(TextUtils_1.TextUtils.shrinkText(text).substring(0, exports.CHAR_LIMIT));
+        }
+        else {
+            setInput(text.substring(0, exports.CHAR_LIMIT));
+        }
+    };
+    const handlePaste = () => {
+        navigator.permissions
+            .query({
+            name: 'clipboard-read',
+        })
+            .then((permission) => {
+            navigator.clipboard
+                .readText()
+                .then((text) => {
+                handleSetInput(text);
+            })
+                .catch((e) => console.error(e));
+        })
+            .catch((e) => console.error(e));
+    };
     const handleClearInput = () => {
         setInput('');
     };
@@ -155,7 +187,7 @@ const AITextProcessor = (_a) => {
         setInput(TextUtils_1.TextUtils.shrinkText(input).trim());
     };
     const handleSelectPreset = (presetName) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         if (!presetName) {
             setSelectedPresetName('');
             setPresetName(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.presetName]);
@@ -167,6 +199,8 @@ const AITextProcessor = (_a) => {
             setChunkOverlapWordCount(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.chunkOverlapWordCount]);
             setChunkPrefix(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.chunkPrefix]);
             setAutoShrinkEnabled(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.autoShrinkEnabled]);
+            setVariableValues(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.variableValues]);
+            setVariableOptions(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.variableOptions]);
         }
         else {
             const selectedPreset = (mergedPresets !== null && mergedPresets !== void 0 ? mergedPresets : {})[presetName];
@@ -181,7 +215,9 @@ const AITextProcessor = (_a) => {
                 setChunkOverlapWordCount((_g = selectedPreset.chunkOverlapWordCount) !== null && _g !== void 0 ? _g : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.chunkOverlapWordCount]);
                 setChunkPrefix((_h = selectedPreset.chunkPrefix) !== null && _h !== void 0 ? _h : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.chunkPrefix]);
                 setAutoShrinkEnabled((_j = selectedPreset.autoShrink) !== null && _j !== void 0 ? _j : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.chunkPrefix]);
-                (_k = inputTextFieldRef.current) === null || _k === void 0 ? void 0 : _k.select();
+                setVariableValues((_k = selectedPreset.variableValues) !== null && _k !== void 0 ? _k : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.variableValues]);
+                setVariableOptions((_l = selectedPreset.variableOptions) !== null && _l !== void 0 ? _l : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.variableOptions]);
+                (_m = inputTextFieldRef.current) === null || _m === void 0 ? void 0 : _m.select();
             }
         }
     };
@@ -196,6 +232,8 @@ const AITextProcessor = (_a) => {
             chunkOverlapWordCount,
             chunkPrefix,
             autoShrink: !!autoShrinkEnabled,
+            variableValues: variableValues !== null && variableValues !== void 0 ? variableValues : {},
+            variableOptions: variableOptions !== null && variableOptions !== void 0 ? variableOptions : {},
         };
         const newPresets = [...Object.values(mergedPresets !== null && mergedPresets !== void 0 ? mergedPresets : {}), presetToSave];
         const newPresetsSortedMap = (0, Preset_1.toSortedPresetsMap)(newPresets);
@@ -263,15 +301,57 @@ const AITextProcessor = (_a) => {
                 react_1.default.createElement("div", { className: "d-flex align-items-center gap-2 fw-bold" },
                     react_1.default.createElement("div", null, "Tokens:"),
                     react_1.default.createElement("div", null,
-                        react_1.default.createElement(react_bootstrap_1.Badge, { pill: true, bg: "secondary" }, TextUtils_1.TextUtils.getEstimatedTokenCount(systemPrompt + userPrompt + chunk, averageTokenLength !== null && averageTokenLength !== void 0 ? averageTokenLength : 0))))),
+                        react_1.default.createElement(react_bootstrap_1.Badge, { pill: true, bg: "secondary" }, TextUtils_1.TextUtils.getEstimatedTokenCount(systemPrompt + preparedUserPrompt + chunk, averageTokenLength !== null && averageTokenLength !== void 0 ? averageTokenLength : 0))))),
             react_1.default.createElement("hr", null),
             systemPrompt && react_1.default.createElement("p", null, systemPrompt),
-            userPrompt && react_1.default.createElement("p", null, userPrompt),
+            preparedUserPrompt && react_1.default.createElement("p", null, preparedUserPrompt),
             chunk && react_1.default.createElement("p", null, chunk)));
     });
     const outputElements = (outputs !== null && outputs !== void 0 ? outputs : []).map((output, i, arr) => {
         return (react_1.default.createElement(react_bootstrap_1.Alert, { key: `output-${i}`, variant: "light", className: "text-black mb-0" },
             react_1.default.createElement(Markdown_1.Markdown, null, output)));
+    });
+    const handleSetVariableValue = (variable, value) => {
+        const newVariableValues = Object.assign({}, variableValues);
+        newVariableValues[variable] = value;
+        setVariableValues(newVariableValues);
+    };
+    const handleAddVariableOption = (variable, option) => {
+        const newVariableOptions = Object.assign({}, variableOptions);
+        let newOptions = Array.isArray(newVariableOptions[variable]) ? newVariableOptions[variable] : [];
+        newOptions = [...new Set([...newOptions, option])].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+        newVariableOptions[variable] = newOptions;
+        setVariableOptions(newVariableOptions);
+    };
+    const handleDeleteVariableOption = (variable, option) => {
+        const newVariableOptions = Object.assign({}, variableOptions);
+        const newOptions = Array.isArray(newVariableOptions[variable]) ? newVariableOptions[variable] : [];
+        if (newOptions.includes(option)) {
+            newOptions.splice(newOptions.indexOf(option), 1);
+            newVariableOptions[variable] = newOptions;
+            setVariableOptions(newVariableOptions);
+        }
+        handleSetVariableValue(variable, '');
+    };
+    const variableElements = variables.map((variable, i) => {
+        var _a;
+        const currVarValue = (_a = (variableValues !== null && variableValues !== void 0 ? variableValues : {})[variable]) !== null && _a !== void 0 ? _a : '';
+        const currVarName = variable
+            .substring(2, variable.length - 2)
+            .split('_')
+            .join(' ');
+        const currVarOpts = Array.isArray(variableOptions[variable]) ? variableOptions[variable] : [];
+        const currValueOptionElements = currVarOpts.map((varValue, j) => (react_1.default.createElement("option", { key: `var-${i}-opt-${j}`, value: varValue }, varValue)));
+        return (react_1.default.createElement("div", { key: `variable-${i}`, className: "d-flex gap-1 mb-1" },
+            react_1.default.createElement(react_bootstrap_1.Form.Control, { size: "sm", type: "text", disabled: true, value: currVarName, style: { width: 150 } }),
+            react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", size: "sm", placeholder: "Value", value: currVarValue, onChange: (e) => handleSetVariableValue(variable, e.target.value), style: { width: 150 } }),
+            react_1.default.createElement(react_bootstrap_1.Form.Select, { size: "sm", value: currVarValue, onChange: (e) => handleSetVariableValue(variable, e.target.value), style: { width: 0 } },
+                react_1.default.createElement("option", { value: "" }),
+                currValueOptionElements),
+            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", size: "sm", onClick: () => handleAddVariableOption(variable, currVarValue) },
+                react_1.default.createElement(fa_1.FaPlus, { className: "mb-1" })),
+            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", size: "sm", onClick: () => handleDeleteVariableOption(variable, currVarValue) },
+                react_1.default.createElement(fa_1.FaTrashAlt, { className: "mb-1" }))));
     });
     const showProcessingAlert = processingRef.current && ((outputs !== null && outputs !== void 0 ? outputs : []).length < currentChunkIndex + 1 || retryingRef.current);
     const selectedPreset = (mergedPresets !== null && mergedPresets !== void 0 ? mergedPresets : {})[selectedPresetName];
@@ -284,7 +364,9 @@ const AITextProcessor = (_a) => {
         selectedPreset.requestMaxTokenRatio !== requestMaxTokenRatio ||
         selectedPreset.chunkOverlapWordCount !== chunkOverlapWordCount ||
         selectedPreset.chunkPrefix !== chunkPrefix ||
-        !!selectedPreset.autoShrink !== !!autoShrinkEnabled;
+        !!selectedPreset.autoShrink !== !!autoShrinkEnabled ||
+        JSON.stringify(selectedPreset.variableValues) !== JSON.stringify(variableValues !== null && variableValues !== void 0 ? variableValues : {}) ||
+        JSON.stringify(selectedPreset.variableOptions) !== JSON.stringify(variableOptions !== null && variableOptions !== void 0 ? variableOptions : {});
     const canSave = !!presetName.trim() && hasChanges;
     const configured = !!openAiModel && !!userPrompt;
     const canExecute = configured && !!input;
@@ -335,10 +417,12 @@ const AITextProcessor = (_a) => {
                                     react_1.default.createElement(react_bootstrap_1.Form.Label, { className: "small fw-bold mb-1" }, "User Prompt"),
                                     react_1.default.createElement(react_bootstrap_1.Form.Control, { as: "textarea", placeholder: "Enter the user prompt", rows: 3, value: userPrompt, onChange: (e) => setUserPrompt(e.target.value) }),
                                     react_1.default.createElement("div", { className: "d-flex justify-content-between gap-2" },
-                                        react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted" }, "Provide the prompt used to process the text. The input text will be appended to the end of this prompt."),
+                                        react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted" },
+                                            "Provide the prompt used to process the text. The input text will be appended to the end of this prompt. You can optionally include variables in double curly braces, like so: ",
+                                            `{{Var_Name}}`),
                                         react_1.default.createElement("div", { className: "d-flex align-items-center gap-1 small" },
                                             react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted my-0" }, "Tokens:"),
-                                            react_1.default.createElement(react_bootstrap_1.Badge, { pill: true, bg: "secondary" }, TextUtils_1.TextUtils.getEstimatedTokenCount(userPrompt, averageTokenLength !== null && averageTokenLength !== void 0 ? averageTokenLength : 0))))),
+                                            react_1.default.createElement(react_bootstrap_1.Badge, { pill: true, bg: "secondary" }, TextUtils_1.TextUtils.getEstimatedTokenCount(preparedUserPrompt, averageTokenLength !== null && averageTokenLength !== void 0 ? averageTokenLength : 0))))),
                                 react_1.default.createElement(react_bootstrap_1.Accordion, null,
                                     react_1.default.createElement(react_bootstrap_1.Accordion.Item, { eventKey: "0" },
                                         react_1.default.createElement(react_bootstrap_1.Accordion.Header, null, "Advanced Config"),
@@ -362,14 +446,14 @@ const AITextProcessor = (_a) => {
                                                     " (",
                                                     `${Math.round(requestMaxTokenRatio * 100)}%`,
                                                     "), and the max tokens for the model is",
-                                                    ' ', (_c = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _c !== void 0 ? _c : 4000,
+                                                    ' ', (_d = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _d !== void 0 ? _d : 4000,
                                                     ", each request (chunk) will have",
                                                     ' ',
-                                                    Math.ceil(((_d = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _d !== void 0 ? _d : 4000) * requestMaxTokenRatio),
+                                                    Math.ceil(((_e = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _e !== void 0 ? _e : 4000) * requestMaxTokenRatio),
                                                     " tokens max. This would leave about",
                                                     ' ',
-                                                    ((_e = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _e !== void 0 ? _e : 4000) -
-                                                        Math.ceil(((_f = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _f !== void 0 ? _f : 4000) * requestMaxTokenRatio),
+                                                    ((_f = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _f !== void 0 ? _f : 4000) -
+                                                        Math.ceil(((_g = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _g !== void 0 ? _g : 4000) * requestMaxTokenRatio),
                                                     ' ',
                                                     "tokens for a meaningful response, per request. For each chunk, we want to make sure there is still a decent amount of tokens left for the response.")),
                                             react_1.default.createElement(react_bootstrap_1.Form.Group, { controlId: "form-group-chunkOverlapWordCount" },
@@ -388,20 +472,19 @@ const AITextProcessor = (_a) => {
                                         react_1.default.createElement(fa_1.FaSave, { className: "mb-1" })),
                                     react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", onClick: handleDeletePreset },
                                         react_1.default.createElement(fa_1.FaTrashAlt, { className: "mb-1" })))))),
+                    variableElements.length > 0 && (react_1.default.createElement(react_bootstrap_1.Form.Group, { controlId: "variables-group" },
+                        react_1.default.createElement(react_bootstrap_1.Form.Label, { className: "small fw-bold mb-1" }, "Variables:"),
+                        variableElements)),
                     react_1.default.createElement(react_bootstrap_1.Form.Group, { controlId: "form-group-input-text" },
                         react_1.default.createElement(react_bootstrap_1.Form.Label, { className: "small fw-bold mb-1" }, "Input Text"),
                         react_1.default.createElement(react_bootstrap_1.Form.Control, { ref: inputTextFieldRef, as: "textarea", placeholder: "Enter text to process", rows: 8, value: input, onChange: (e) => {
-                                if (autoShrinkEnabled) {
-                                    setInput(TextUtils_1.TextUtils.shrinkText(e.target.value).substring(0, exports.CHAR_LIMIT));
-                                }
-                                else {
-                                    setInput(e.target.value.substring(0, exports.CHAR_LIMIT));
-                                }
+                                handleSetInput(e.target.value);
                             }, onFocus: handleInputTextFieldFocus })),
                     react_1.default.createElement("div", { className: "d-flex justify-content-between align-items-start gap-2" },
                         react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
+                            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", size: "sm", onClick: handlePaste }, "Paste"),
                             react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", size: "sm", onClick: handleClearInput, disabled: !hasInput }, "Clear"),
-                            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", size: "sm", onClick: handleShrink, disabled: !hasInput },
+                            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-secondary", size: "sm", onClick: handleShrink, disabled: !hasInput },
                                 react_1.default.createElement("div", { className: "d-flex align-items-center gap-1" }, "Shrink")),
                             react_1.default.createElement(react_bootstrap_1.Form.Check, { inline: true, label: "Auto-shrink", className: "user-select-none small mb-0", id: "auto-shrink-checkbox", checked: !!autoShrinkEnabled, onChange: (e) => setAutoShrinkEnabled(e.target.checked) })),
                         react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
@@ -464,7 +547,7 @@ const AITextProcessor = (_a) => {
                     react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted my-0" }, "Tokens:"),
                     react_1.default.createElement(react_bootstrap_1.Badge, { pill: true, bg: "secondary" }, TextUtils_1.TextUtils.getEstimatedTokenCount((outputs !== null && outputs !== void 0 ? outputs : []).join(' '), averageTokenLength !== null && averageTokenLength !== void 0 ? averageTokenLength : 0)))))),
         errorAlertElements,
-        ((_g = (outputs !== null && outputs !== void 0 ? outputs : [])) === null || _g === void 0 ? void 0 : _g.length) > 0 && (react_1.default.createElement("h5", { className: "text-center text-muted" },
+        ((_h = (outputs !== null && outputs !== void 0 ? outputs : [])) === null || _h === void 0 ? void 0 : _h.length) > 0 && (react_1.default.createElement("h5", { className: "text-center text-muted" },
             "If this project helped you, please",
             ' ',
             react_1.default.createElement("a", { href: "https://github.com/justinmahar/ai-text-processor/" }, "Star it on GitHub"),

@@ -22,6 +22,8 @@ var LocalSettingsKeys;
     LocalSettingsKeys["openAiModel"] = "openAiModel";
     LocalSettingsKeys["systemPrompt"] = "systemPrompt";
     LocalSettingsKeys["userPrompt"] = "userPrompt";
+    LocalSettingsKeys["variableValues"] = "variableValues";
+    LocalSettingsKeys["variableOptions"] = "variableOptions";
     LocalSettingsKeys["input"] = "input";
     LocalSettingsKeys["outputs"] = "outputs";
     LocalSettingsKeys["showRawOutput"] = "showRawOutput";
@@ -42,6 +44,8 @@ exports.LocalSettingsDefaults = {
     [LocalSettingsKeys.openAiModel]: AIModelInfo_1.defaultOpenAiModelInfos[0].id,
     [LocalSettingsKeys.systemPrompt]: 'You are a helpful assistant.',
     [LocalSettingsKeys.userPrompt]: '',
+    [LocalSettingsKeys.variableValues]: {},
+    [LocalSettingsKeys.variableOptions]: {},
     [LocalSettingsKeys.input]: '',
     [LocalSettingsKeys.outputs]: [],
     [LocalSettingsKeys.showRawOutput]: false,
@@ -68,6 +72,8 @@ const useLocalSettings = () => {
         [LocalSettingsKeys.openAiModel]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.openAiModel, exports.LocalSettingsDefaults[LocalSettingsKeys.openAiModel], storageOptions),
         [LocalSettingsKeys.systemPrompt]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.systemPrompt, exports.LocalSettingsDefaults[LocalSettingsKeys.systemPrompt], storageOptions),
         [LocalSettingsKeys.userPrompt]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.userPrompt, exports.LocalSettingsDefaults[LocalSettingsKeys.userPrompt], storageOptions),
+        [LocalSettingsKeys.variableValues]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.variableValues, exports.LocalSettingsDefaults[LocalSettingsKeys.variableValues], storageOptions),
+        [LocalSettingsKeys.variableOptions]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.variableOptions, exports.LocalSettingsDefaults[LocalSettingsKeys.variableOptions], storageOptions),
         [LocalSettingsKeys.input]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.input, exports.LocalSettingsDefaults[LocalSettingsKeys.input], storageOptions),
         [LocalSettingsKeys.outputs]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.outputs, exports.LocalSettingsDefaults[LocalSettingsKeys.outputs], storageOptions),
         [LocalSettingsKeys.showRawOutput]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.showRawOutput, exports.LocalSettingsDefaults[LocalSettingsKeys.showRawOutput], storageOptions),

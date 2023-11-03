@@ -13,6 +13,8 @@ export declare enum LocalSettingsKeys {
     openAiModel = "openAiModel",
     systemPrompt = "systemPrompt",
     userPrompt = "userPrompt",
+    variableValues = "variableValues",
+    variableOptions = "variableOptions",
     input = "input",
     outputs = "outputs",
     showRawOutput = "showRawOutput",
@@ -33,6 +35,8 @@ export declare const LocalSettingsDefaults: {
     openAiModel: string;
     systemPrompt: string;
     userPrompt: string;
+    variableValues: {};
+    variableOptions: {};
     input: string;
     outputs: never[];
     showRawOutput: boolean;
@@ -53,6 +57,8 @@ export declare const useLocalSettings: () => {
     openAiModel: import("react-storage-complete").StorageState<any>;
     systemPrompt: import("react-storage-complete").StorageState<any>;
     userPrompt: import("react-storage-complete").StorageState<any>;
+    variableValues: import("react-storage-complete").StorageState<any>;
+    variableOptions: import("react-storage-complete").StorageState<any>;
     input: import("react-storage-complete").StorageState<any>;
     outputs: import("react-storage-complete").StorageState<string[]>;
     showRawOutput: import("react-storage-complete").StorageState<any>;
