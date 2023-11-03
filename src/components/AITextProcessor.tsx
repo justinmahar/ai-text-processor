@@ -13,6 +13,8 @@ import { TextUtils } from './TextUtils';
 import { AIModelInfo, defaultOpenAiModelInfos } from './AIModelInfo';
 import { LocalSettingsDefaults, LocalSettingsKeys, useLocalSettings } from './useLocalSettings';
 
+export const CHAR_LIMIT = 2000000;
+
 export interface AITextProcessorProps extends DivProps {}
 
 export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
@@ -153,7 +155,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   };
 
   const handleShrink = () => {
-    setInput(TextUtils.shrinkText(input));
+    setInput(TextUtils.shrinkText(input).trim());
   };
 
   const handleSelectPreset = (presetName: string) => {
@@ -524,9 +526,9 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                 value={input}
                 onChange={(e) => {
                   if (autoShrinkEnabled) {
-                    setInput(TextUtils.shrinkText(e.target.value));
+                    setInput(TextUtils.shrinkText(e.target.value).substring(0, CHAR_LIMIT));
                   } else {
-                    setInput(e.target.value);
+                    setInput(e.target.value.substring(0, CHAR_LIMIT));
                   }
                 }}
                 onFocus={handleInputTextFieldFocus}
@@ -564,6 +566,11 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                 </div>
               </div>
             </div>
+            {(input ?? '').length === CHAR_LIMIT && (
+              <Alert variant="info">
+                Input text is limited to {CHAR_LIMIT} characters. Your current input has reached the max.
+              </Alert>
+            )}
             {showChunkInspector && (
               <Accordion>
                 <Accordion.Item eventKey="0">

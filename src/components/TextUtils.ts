@@ -6,8 +6,7 @@ export class TextUtils {
       .split(/\n+/)
       .join(' ')
       .split(/\s\s+/)
-      .join(' ')
-      .trim();
+      .join(' ');
   }
 
   public static getEstimatedTokenCount(text: string, averageTokenLength = 4) {
