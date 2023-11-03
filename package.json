@@ -1,6 +1,6 @@
 {
   "name": "ai-text-processor",
-  "version": "1.0.3",
+  "version": "1.0.2",
   "author": "Justin Mahar <contact@justinmahar.com>",
   "description": "A template to build, test, and share React components and hooks easily.",
   "homepage": "https://justinmahar.github.io/ai-text-processor/",
@@ -57,7 +57,10 @@
     "chunking",
     "preset",
     "presets",
-    "utility"
+    "utility",
+    "token",
+    "tokens",
+    "count"
   ],
   "peerDependencies": {
     "react": "^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0",
