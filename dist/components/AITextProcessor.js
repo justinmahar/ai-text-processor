@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AITextProcessor = void 0;
+exports.AITextProcessor = exports.CHAR_LIMIT = void 0;
 require("bootstrap/dist/css/bootstrap.css");
 const classnames_1 = __importDefault(require("classnames"));
 const copy_to_clipboard_1 = __importDefault(require("copy-to-clipboard"));
@@ -28,8 +28,9 @@ const Preset_1 = require("./Preset");
 const TextUtils_1 = require("./TextUtils");
 const AIModelInfo_1 = require("./AIModelInfo");
 const useLocalSettings_1 = require("./useLocalSettings");
+exports.CHAR_LIMIT = 2000000;
 const AITextProcessor = (_a) => {
-    var _b, _c, _d, _e, _f;
+    var _b, _c, _d, _e, _f, _g;
     var props = __rest(_a, []);
     const localSettings = (0, useLocalSettings_1.useLocalSettings)();
     const [presets, setPresets] = localSettings[useLocalSettings_1.LocalSettingsKeys.presets];
@@ -60,6 +61,7 @@ const AITextProcessor = (_a) => {
     const processingRef = react_1.default.useRef(false);
     const outputsRef = react_1.default.useRef([]);
     const inputTextFieldRef = react_1.default.useRef(null);
+    const retryingRef = react_1.default.useRef(false);
     const chunks = TextUtils_1.TextUtils.getChunks(`${systemPrompt}`, `${userPrompt}`, `${input}`, (_b = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _b !== void 0 ? _b : 0, {
         averageTokenLength: averageTokenLength !== null && averageTokenLength !== void 0 ? averageTokenLength : 4,
         requestMaxTokenRatio: requestMaxTokenRatio !== null && requestMaxTokenRatio !== void 0 ? requestMaxTokenRatio : 0.6,
@@ -84,8 +86,11 @@ const AITextProcessor = (_a) => {
                     },
                     onDone(xhr) {
                         setXhr(undefined);
-                        if (processingRef.current) {
-                            processChunk(chunkIndex + 1);
+                        setRenderTime(Date.now());
+                        if (processingRef.current && !retryingRef.current) {
+                            setTimeout(() => {
+                                processChunk(chunkIndex + 1);
+                            }, 1000);
                         }
                     },
                     onError(error, status, xhr) {
@@ -128,11 +133,26 @@ const AITextProcessor = (_a) => {
         xhr === null || xhr === void 0 ? void 0 : xhr.abort();
         setRenderTime(Date.now());
     };
+    const handleRetryChunk = () => {
+        retryingRef.current = true;
+        xhr === null || xhr === void 0 ? void 0 : xhr.abort();
+        errorsRef.current = [];
+        processingRef.current = true;
+        const newOutputs = outputsRef.current.slice(0, currentChunkIndex);
+        outputsRef.current = newOutputs;
+        setOutputs(newOutputs);
+        setRenderTime(Date.now());
+        setTimeout(() => {
+            retryingRef.current = false;
+            setRenderTime(Date.now());
+            processChunk(currentChunkIndex);
+        }, 1000);
+    };
     const handleClearInput = () => {
         setInput('');
     };
     const handleShrink = () => {
-        setInput(TextUtils_1.TextUtils.shrinkText(input));
+        setInput(TextUtils_1.TextUtils.shrinkText(input).trim());
     };
     const handleSelectPreset = (presetName) => {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
@@ -249,10 +269,11 @@ const AITextProcessor = (_a) => {
             userPrompt && react_1.default.createElement("p", null, userPrompt),
             chunk && react_1.default.createElement("p", null, chunk)));
     });
-    const outputElements = (outputs !== null && outputs !== void 0 ? outputs : []).map((output, i) => {
-        return (react_1.default.createElement(react_bootstrap_1.Alert, { key: `output-${i}`, variant: "light", className: "text-black" },
+    const outputElements = (outputs !== null && outputs !== void 0 ? outputs : []).map((output, i, arr) => {
+        return (react_1.default.createElement(react_bootstrap_1.Alert, { key: `output-${i}`, variant: "light", className: "text-black mb-0" },
             react_1.default.createElement(Markdown_1.Markdown, null, output)));
     });
+    const showProcessingAlert = processingRef.current && ((outputs !== null && outputs !== void 0 ? outputs : []).length < currentChunkIndex + 1 || retryingRef.current);
     const selectedPreset = (mergedPresets !== null && mergedPresets !== void 0 ? mergedPresets : {})[selectedPresetName];
     const hasChanges = !selectedPreset ||
         (selectedPreset && selectedPreset.name !== presetName) ||
@@ -371,10 +392,10 @@ const AITextProcessor = (_a) => {
                         react_1.default.createElement(react_bootstrap_1.Form.Label, { className: "small fw-bold mb-1" }, "Input Text"),
                         react_1.default.createElement(react_bootstrap_1.Form.Control, { ref: inputTextFieldRef, as: "textarea", placeholder: "Enter text to process", rows: 8, value: input, onChange: (e) => {
                                 if (autoShrinkEnabled) {
-                                    setInput(TextUtils_1.TextUtils.shrinkText(e.target.value));
+                                    setInput(TextUtils_1.TextUtils.shrinkText(e.target.value).substring(0, exports.CHAR_LIMIT));
                                 }
                                 else {
-                                    setInput(e.target.value);
+                                    setInput(e.target.value.substring(0, exports.CHAR_LIMIT));
                                 }
                             }, onFocus: handleInputTextFieldFocus })),
                     react_1.default.createElement("div", { className: "d-flex justify-content-between align-items-start gap-2" },
@@ -390,6 +411,10 @@ const AITextProcessor = (_a) => {
                             react_1.default.createElement("div", { className: "d-flex align-items-center gap-1 small" },
                                 react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted my-0" }, "Tokens:"),
                                 react_1.default.createElement(react_bootstrap_1.Badge, { pill: true, bg: "secondary" }, TextUtils_1.TextUtils.getEstimatedTokenCount(input, averageTokenLength !== null && averageTokenLength !== void 0 ? averageTokenLength : 0))))),
+                    (input !== null && input !== void 0 ? input : '').length === exports.CHAR_LIMIT && (react_1.default.createElement(react_bootstrap_1.Alert, { variant: "info" },
+                        "Input text is limited to ",
+                        exports.CHAR_LIMIT,
+                        " characters. Your current input has reached the max.")),
                     showChunkInspector && (react_1.default.createElement(react_bootstrap_1.Accordion, null,
                         react_1.default.createElement(react_bootstrap_1.Accordion.Item, { eventKey: "0" },
                             react_1.default.createElement(react_bootstrap_1.Accordion.Header, null,
@@ -404,32 +429,45 @@ const AITextProcessor = (_a) => {
                     react_1.default.createElement("div", { className: "d-flex justify-content-center gap-2" },
                         !processingRef.current && (react_1.default.createElement(react_bootstrap_1.Button, { size: "lg", variant: "primary", onClick: handleExecute, disabled: !canExecute }, "Execute")),
                         processingRef.current && (react_1.default.createElement(react_bootstrap_1.Button, { size: "lg", variant: "danger", onClick: handleStop }, "Stop")))))),
-        (xhr || (outputs !== null && outputs !== void 0 ? outputs : []).length > 0) && (react_1.default.createElement("div", { className: "d-flex flex-column gap-1" },
+        (xhr || processingRef.current || errorsRef.current.length > 0 || (outputs !== null && outputs !== void 0 ? outputs : []).length > 0) && (react_1.default.createElement("div", { className: "d-flex flex-column gap-1" },
             react_1.default.createElement(react_bootstrap_1.Card, null,
                 react_1.default.createElement(react_bootstrap_1.Card.Header, { className: "d-flex justify-content-between align-items-center gap-2" },
                     react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
+                        processingRef.current && (react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
+                            react_1.default.createElement(react_bootstrap_1.Spinner, { animation: "border", role: "status", size: "sm" }))),
                         "Output",
                         processingRef.current && (react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
-                            react_1.default.createElement(react_bootstrap_1.Spinner, { animation: "border", role: "status", size: "sm" }),
-                            react_1.default.createElement("div", { className: "small fw-bold" },
+                            react_1.default.createElement(react_bootstrap_1.Badge, { bg: "secondary", className: "small fw-bold" },
                                 "Chunk ",
                                 currentChunkIndex + 1,
                                 " of ",
                                 chunks.length,
-                                "...")))),
+                                "..."))),
+                        currentChunkIndex >= 0 && (react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", size: "sm", onClick: handleRetryChunk, disabled: retryingRef.current }, "Retry Chunk"))),
                     react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
                         react_1.default.createElement(react_bootstrap_1.Form.Check, { inline: true, label: "Raw", className: "user-select-none", id: "raw-checkbox", checked: showRawOutput, onChange: (e) => setShowRawOutput(e.target.checked) }),
                         react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", onClick: handleCopy }, copied ? react_1.default.createElement(fa_1.FaCheck, { className: "mb-1" }) : react_1.default.createElement(fa_1.FaCopy, { className: "mb-1" })),
                         react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", onClick: handleClear },
                             react_1.default.createElement(fa_1.FaTrash, { className: "mb-1" })))),
-                react_1.default.createElement(react_bootstrap_1.Card.Body, null,
+                react_1.default.createElement(react_bootstrap_1.Card.Body, { className: "d-flex flex-column gap-2" },
                     !outputs && react_1.default.createElement(react_bootstrap_1.Spinner, { animation: "border", role: "status", size: "sm" }),
                     outputs && showRawOutput && react_1.default.createElement("pre", null, outputs.join('\n\n')),
-                    outputs && !showRawOutput && outputElements)),
+                    outputs && !showRawOutput && outputElements,
+                    showProcessingAlert && (react_1.default.createElement(react_bootstrap_1.Alert, { variant: "light", className: "text-black mb-0" },
+                        react_1.default.createElement("div", { className: "d-flex align-items-center small gap-2" },
+                            react_1.default.createElement(react_bootstrap_1.Spinner, { animation: "border", role: "status", size: "sm" }),
+                            " Processing chunk ",
+                            currentChunkIndex + 1,
+                            "..."))))),
             react_1.default.createElement("div", { className: "d-flex justify-content-end" },
                 react_1.default.createElement("div", { className: "d-flex align-items-center gap-1 small" },
                     react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted my-0" }, "Tokens:"),
                     react_1.default.createElement(react_bootstrap_1.Badge, { pill: true, bg: "secondary" }, TextUtils_1.TextUtils.getEstimatedTokenCount((outputs !== null && outputs !== void 0 ? outputs : []).join(' '), averageTokenLength !== null && averageTokenLength !== void 0 ? averageTokenLength : 0)))))),
-        errorAlertElements));
+        errorAlertElements,
+        ((_g = (outputs !== null && outputs !== void 0 ? outputs : [])) === null || _g === void 0 ? void 0 : _g.length) > 0 && (react_1.default.createElement("h5", { className: "text-center text-muted" },
+            "If this project helped you, please",
+            ' ',
+            react_1.default.createElement("a", { href: "https://github.com/justinmahar/ai-text-processor/" }, "Star it on GitHub"),
+            " so others can find it. :)"))));
 };
 exports.AITextProcessor = AITextProcessor;

@@ -9,8 +9,7 @@ class TextUtils {
             .split(/\n+/)
             .join(' ')
             .split(/\s\s+/)
-            .join(' ')
-            .trim();
+            .join(' ');
     }
     static getEstimatedTokenCount(text, averageTokenLength = 4) {
         return Math.ceil(text.length / averageTokenLength);
