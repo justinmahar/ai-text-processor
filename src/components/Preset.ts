@@ -14,18 +14,21 @@ export interface Preset {
 
 export const defaultPresets: Preset[] = [
   {
-    name: 'Extract Main Points',
+    name: 'Extract Data',
     aiModel: 'gpt-3.5-turbo',
     systemPrompt: 'You are a helpful assistant.',
     userPrompt:
-      'Extract, condense, and distill the main points from the following, and list them. Do not provide a heading or commentary. Here is the text:',
+      'Extract, condense, and distill the {{Data_To_Extract}} from the following {{Document_Type}}, and list them. Do not provide a heading or commentary. Here is the {{Document_Type}}:',
     averageTokenLength: 4.5,
     requestMaxTokenRatio: 0.7,
     chunkOverlapWordCount: 20,
     chunkPrefix: '(continued...) ',
     autoShrink: false,
-    variableValues: {},
-    variableOptions: {},
+    variableValues: { '{{Data_To_Extract}}': 'main points', '{{Document_Type}}': 'text' },
+    variableOptions: {
+      '{{Data_To_Extract}}': ['key ideas', 'main points', 'strategies'],
+      '{{Document_Type}}': ['text', 'transcript'],
+    },
   },
   {
     name: 'Quick Summary',
