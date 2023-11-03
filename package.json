@@ -1,6 +1,6 @@
 {
   "name": "ai-text-processor",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": "Justin Mahar <contact@justinmahar.com>",
   "description": "Utility for processing text using AI. Summarize, analyze, extract, translate, format, and more! ✨",
   "homepage": "https://justinmahar.github.io/ai-text-processor/",
