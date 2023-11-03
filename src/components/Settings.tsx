@@ -6,6 +6,7 @@ import { DivProps } from 'react-html-props';
 import { FaEye, FaEyeSlash, FaPlus, FaTrashAlt } from 'react-icons/fa';
 import { LocalSettingsKeys, useLocalSettings } from './useLocalSettings';
 import { AIModel, defaultOpenAiModels } from './open-ai-models';
+import { ImportExportModal } from './ImportExportModal';
 
 export interface SettingsProps extends DivProps {}
 
@@ -18,6 +19,7 @@ export const Settings = ({ ...props }: SettingsProps) => {
   const [newOpenAiModelId, setNewOpenAiModelId] = React.useState('');
   const [newOpenAiModelMaxTokens, setNewOpenAiModelMaxTokens] = React.useState('');
   const [showChunkInspector, setShowChunkInspector] = localSettings[LocalSettingsKeys.showChunkInspector];
+  const [showImportExportModal, setShowImportExportModal] = React.useState(false);
 
   const mergedOpenAiModels: AIModel[] = [...defaultOpenAiModels, ...(customOpenAiModels ?? [])];
 
@@ -80,6 +82,7 @@ export const Settings = ({ ...props }: SettingsProps) => {
 
   return (
     <div {...props} className={classNames(props.className)} style={{ ...props.style }}>
+      {showImportExportModal && <ImportExportModal show={showImportExportModal} setShow={setShowImportExportModal} />}
       <Card>
         <Card.Header>Settings</Card.Header>
         <Card.Body className="d-flex flex-column gap-2">
@@ -160,6 +163,11 @@ export const Settings = ({ ...props }: SettingsProps) => {
               />
             </Card.Body>
           </Card>
+          <div>
+            <Button variant="primary" onClick={() => setShowImportExportModal(true)}>
+              Import/Export Settings
+            </Button>
+          </div>
         </Card.Body>
       </Card>
     </div>
