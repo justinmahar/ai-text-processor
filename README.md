@@ -29,11 +29,13 @@ Happy text processing!
 - **📖 Process Text With AI**
   - Quickly and easily process text using any of OpenAI's chat models.
 - **📒 Presets**
-  - Save presets to reuse prompts and speed up your workflow.
+  - Save presets to reuse prompts to speed up your workflow.
 - **✂️ Chunking**
   - Automatically split long inputs into chunks that leave token headroom for your desired output.
 - **⚙️ Configurable**
   - Lots of control! Configure AI models, prompts, token length, and chunking logic.
+- **🧑‍💻 Supports Many Use Cases**
+  - Supports summarization, analysis, data extraction, translation, formatting—the possibilities are endless!
 
 [lock:donate]::🚫---------------------------------------
 
@@ -75,6 +77,8 @@ This utility supports variety of use cases, including (but certainly not limited
 - **Data Extraction** - Extract key data from large amounts of text.
 - **Language Translation** - Translate text from one language to another.
 - **Text Formatting** - Format output text using specified criteria.
+
+One of the main features of this utility is the ability to save and reuse presets. This can significantly speed up your workflow.
 
 ## TypeScript
 
