@@ -5,29 +5,20 @@ import { ClientStreamChatCompletionConfig, OpenAIExt } from 'openai-ext';
 import React from 'react';
 import { Accordion, Alert, Badge, Button, Card, Form, Spinner } from 'react-bootstrap';
 import { DivProps } from 'react-html-props';
-import {
-  FaAlignLeft,
-  FaCheck,
-  FaCheckSquare,
-  FaCopy,
-  FaSave,
-  FaSoap,
-  FaTrash,
-  FaTrashAlt,
-  FaWrench,
-} from 'react-icons/fa';
+import { FaAlignLeft, FaCheck, FaCheckSquare, FaCopy, FaSave, FaTrash, FaTrashAlt, FaWrench } from 'react-icons/fa';
 import { useMomentaryBool } from 'react-use-precision-timer';
 import { Markdown } from './Markdown';
-import { AIModel, defaultOpenAiModels } from './open-ai-models';
+import { Preset, defaultPresetsMap, toSortedPresetsMap } from './Preset';
 import { TextUtils } from './TextUtils';
+import { AIModel, defaultOpenAiModels } from './open-ai-models';
 import { LocalSettingsDefaults, LocalSettingsKeys, useLocalSettings } from './useLocalSettings';
-import { Preset } from './Preset';
 
 export interface ProcessorProps extends DivProps {}
 
 export const Processor = ({ ...props }: ProcessorProps) => {
   const localSettings = useLocalSettings();
   const [presets, setPresets] = localSettings[LocalSettingsKeys.presets];
+  const mergedPresets = toSortedPresetsMap([...Object.values(defaultPresetsMap), ...Object.values(presets ?? {})]);
   const [presetName, setPresetName] = localSettings[LocalSettingsKeys.presetName];
   const [openAiModel, setOpenAiModel] = localSettings[LocalSettingsKeys.openAiModel];
   const [systemPrompt, setSystemPrompt] = localSettings[LocalSettingsKeys.systemPrompt];
@@ -158,7 +149,7 @@ export const Processor = ({ ...props }: ProcessorProps) => {
       setChunkPrefix(LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
       setAutoShrinkEnabled(LocalSettingsDefaults[LocalSettingsKeys.autoShrinkEnabled]);
     } else {
-      const selectedPreset = (presets ?? {})[presetName];
+      const selectedPreset = (mergedPresets ?? {})[presetName];
       if (selectedPreset) {
         setSelectedPresetName(presetName);
         setPresetName(selectedPreset.name ?? LocalSettingsDefaults[LocalSettingsKeys.presetName]);
@@ -193,21 +184,16 @@ export const Processor = ({ ...props }: ProcessorProps) => {
       chunkPrefix,
       autoShrink: !!autoShrinkEnabled,
     };
-    const newPresets: Record<string, any> = { ...(presets ?? {}), [presetToSave.name]: presetToSave };
-    const newPresetsSorted: Record<string, any> = {};
-    Object.keys(newPresets)
-      .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-      .forEach((key) => {
-        newPresetsSorted[key] = newPresets[key];
-      });
-    setPresets(newPresetsSorted);
+    const newPresets: Preset[] = [...Object.values(mergedPresets ?? {}), presetToSave];
+    const newPresetsSortedMap: Record<string, Preset> = toSortedPresetsMap(newPresets);
+    setPresets(newPresetsSortedMap);
     setSelectedPresetName(presetName);
     setRenderTime(Date.now());
   };
 
   const handleDeletePreset = () => {
     if (selectedPresetName) {
-      const newPresets = { ...(presets ?? {}) };
+      const newPresets = { ...(mergedPresets ?? {}) };
       delete newPresets[selectedPresetName];
       setPresets(newPresets);
     }
@@ -256,9 +242,9 @@ export const Processor = ({ ...props }: ProcessorProps) => {
     );
   });
 
-  const presetKeys = Object.keys(presets ?? {});
+  const presetKeys = Object.keys(mergedPresets ?? {});
   const presetOptionElements: JSX.Element[] = presetKeys.map((presetKey) => {
-    const preset = (presets ?? {})[presetKey];
+    const preset = (mergedPresets ?? {})[presetKey];
     return (
       <option key={`${presetKey}`} value={presetKey}>
         {presetKey} ({mergedOpenAiModels.find((m) => m.id === preset.aiModel)?.name ?? preset.aiModel})
@@ -298,7 +284,7 @@ export const Processor = ({ ...props }: ProcessorProps) => {
     );
   });
 
-  const selectedPreset = (presets ?? {})[selectedPresetName];
+  const selectedPreset = (mergedPresets ?? {})[selectedPresetName];
   const hasChanges =
     !selectedPreset ||
     (selectedPreset && selectedPreset.name !== presetName) ||

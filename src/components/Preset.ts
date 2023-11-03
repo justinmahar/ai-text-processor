@@ -48,7 +48,11 @@ export const defaultPresets: Preset[] = [
   },
 ];
 
-export const defaultPresetsMap = defaultPresets
-  .map((preset): Record<string, Preset> => ({ [preset.name]: preset }))
-  .sort((a, b) => Object.keys(a)[0].toLowerCase().localeCompare(Object.keys(b)[0].toLowerCase()))
-  .reduce((p, c) => ({ ...p, [Object.keys(c)[0]]: c[Object.keys(c)[0]] }));
+export const toSortedPresetsMap = (presets: Preset[]): Record<string, Preset> => {
+  return presets
+    .map((preset): Record<string, Preset> => ({ [preset.name]: preset }))
+    .sort((a, b) => Object.keys(a)[0].toLowerCase().localeCompare(Object.keys(b)[0].toLowerCase()))
+    .reduce((p, c) => ({ ...p, [Object.keys(c)[0]]: c[Object.keys(c)[0]] }));
+};
+
+export const defaultPresetsMap = toSortedPresetsMap(defaultPresets);
