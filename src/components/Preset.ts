@@ -27,7 +27,7 @@ export const defaultPresets: Preset[] = [
     variableValues: { '{{Data_To_Extract}}': 'main points', '{{Document_Type}}': 'text' },
     variableOptions: {
       '{{Data_To_Extract}}': ['key ideas', 'main points', 'strategies'],
-      '{{Document_Type}}': ['text', 'transcript'],
+      '{{Document_Type}}': ['text', 'video transcript'],
     },
   },
   {
@@ -117,18 +117,20 @@ export const defaultPresets: Preset[] = [
     },
   },
   {
-    name: 'YouTube Transcript Formatter',
+    name: 'Format Text',
     aiModel: 'gpt-3.5-turbo',
     systemPrompt: 'You are a helpful assistant.',
     userPrompt:
-      'For the following YouTube video transcript, add punctuation and capitalize the sentences for the text. Do not change the text in any other way and do NOT add or change any words. Transcript:',
+      'For the following {{Document_Type}}, add punctuation and capitalize the sentences for the text. Do not change the text in any other way and do NOT add or change any words. Here is the {{Document_Type}}:',
     averageTokenLength: 4.5,
     requestMaxTokenRatio: 0.4,
     chunkOverlapWordCount: 0,
     chunkPrefix: '',
     autoShrink: true,
-    variableValues: {},
-    variableOptions: {},
+    variableValues: { '{{Document_Type}}': 'text' },
+    variableOptions: {
+      '{{Document_Type}}': ['text', 'video transcript'],
+    },
   },
 ];
 
