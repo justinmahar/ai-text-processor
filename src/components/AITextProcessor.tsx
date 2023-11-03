@@ -5,7 +5,17 @@ import { ClientStreamChatCompletionConfig, OpenAIExt } from 'openai-ext';
 import React from 'react';
 import { Accordion, Alert, Badge, Button, Card, Form, Spinner } from 'react-bootstrap';
 import { DivProps } from 'react-html-props';
-import { FaAlignLeft, FaCheck, FaCheckSquare, FaCopy, FaSave, FaTrash, FaTrashAlt, FaWrench } from 'react-icons/fa';
+import {
+  FaAlignLeft,
+  FaCheck,
+  FaCheckSquare,
+  FaCopy,
+  FaPlus,
+  FaSave,
+  FaTrash,
+  FaTrashAlt,
+  FaWrench,
+} from 'react-icons/fa';
 import { useMomentaryBool } from 'react-use-precision-timer';
 import { Markdown } from './Markdown';
 import { Preset, defaultPresetsMap, toSortedPresetsMap } from './Preset';
@@ -25,6 +35,9 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const [openAiModel, setOpenAiModel] = localSettings[LocalSettingsKeys.openAiModel];
   const [systemPrompt, setSystemPrompt] = localSettings[LocalSettingsKeys.systemPrompt];
   const [userPrompt, setUserPrompt] = localSettings[LocalSettingsKeys.userPrompt];
+  const variables = [...new Set(`${systemPrompt}\n${userPrompt}`.match(/\{\{([\w_-]+)\}\}/g) ?? [])];
+  const [variableValues, setVariableValues] = localSettings[LocalSettingsKeys.variableValues];
+  const [variableOptions, setVariableOptions] = localSettings[LocalSettingsKeys.variableOptions];
   const [input, setInput] = localSettings[LocalSettingsKeys.input];
   const [outputs, setOutputs] = localSettings[LocalSettingsKeys.outputs];
   const [openAiKey] = localSettings[LocalSettingsKeys.openAiKey];
@@ -49,9 +62,15 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const inputTextFieldRef = React.useRef<HTMLTextAreaElement | null>(null);
   const retryingRef = React.useRef(false);
 
+  let preparedUserPrompt: string = userPrompt ?? '';
+  variables.forEach((variable) => {
+    const replacement = variableValues[variable] ?? '';
+    preparedUserPrompt = preparedUserPrompt.split(variable).join(replacement);
+  });
+
   const chunks = TextUtils.getChunks(
     `${systemPrompt}`,
-    `${userPrompt}`,
+    `${preparedUserPrompt}`,
     `${input}`,
     currentOpenAiModelInfo?.maxTokens ?? 0,
     {
@@ -101,7 +120,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       if (systemPrompt) {
         messages.push({ role: 'system', content: systemPrompt });
       }
-      messages.push({ role: 'user', content: `${userPrompt}\n\n${chunk}`.trim() });
+      messages.push({ role: 'user', content: `${preparedUserPrompt}\n\n${chunk}`.trim() });
 
       // Make the call and store a reference to the XMLHttpRequest
       const xhr = OpenAIExt.streamClientChatCompletion(
@@ -150,6 +169,30 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     }, 1000);
   };
 
+  const handleSetInput = (text: string) => {
+    if (autoShrinkEnabled) {
+      setInput(TextUtils.shrinkText(text).substring(0, CHAR_LIMIT));
+    } else {
+      setInput(text.substring(0, CHAR_LIMIT));
+    }
+  };
+
+  const handlePaste = () => {
+    navigator.permissions
+      .query({
+        name: 'clipboard-read',
+      } as any)
+      .then((permission) => {
+        navigator.clipboard
+          .readText()
+          .then((text) => {
+            handleSetInput(text);
+          })
+          .catch((e) => console.error(e));
+      })
+      .catch((e) => console.error(e));
+  };
+
   const handleClearInput = () => {
     setInput('');
   };
@@ -170,6 +213,8 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       setChunkOverlapWordCount(LocalSettingsDefaults[LocalSettingsKeys.chunkOverlapWordCount]);
       setChunkPrefix(LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
       setAutoShrinkEnabled(LocalSettingsDefaults[LocalSettingsKeys.autoShrinkEnabled]);
+      setVariableValues(LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
+      setVariableOptions(LocalSettingsDefaults[LocalSettingsKeys.variableOptions]);
     } else {
       const selectedPreset = (mergedPresets ?? {})[presetName];
       if (selectedPreset) {
@@ -189,6 +234,8 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
         );
         setChunkPrefix(selectedPreset.chunkPrefix ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
         setAutoShrinkEnabled(selectedPreset.autoShrink ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
+        setVariableValues(selectedPreset.variableValues ?? LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
+        setVariableOptions(selectedPreset.variableOptions ?? LocalSettingsDefaults[LocalSettingsKeys.variableOptions]);
         inputTextFieldRef.current?.select();
       }
     }
@@ -205,6 +252,8 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       chunkOverlapWordCount,
       chunkPrefix,
       autoShrink: !!autoShrinkEnabled,
+      variableValues: variableValues ?? {},
+      variableOptions: variableOptions ?? {},
     };
     const newPresets: Preset[] = [...Object.values(mergedPresets ?? {}), presetToSave];
     const newPresetsSortedMap: Record<string, Preset> = toSortedPresetsMap(newPresets);
@@ -285,14 +334,14 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
             <div>Tokens:</div>
             <div>
               <Badge pill bg="secondary">
-                {TextUtils.getEstimatedTokenCount(systemPrompt + userPrompt + chunk, averageTokenLength ?? 0)}
+                {TextUtils.getEstimatedTokenCount(systemPrompt + preparedUserPrompt + chunk, averageTokenLength ?? 0)}
               </Badge>
             </div>
           </div>
         </div>
         <hr />
         {systemPrompt && <p>{systemPrompt}</p>}
-        {userPrompt && <p>{userPrompt}</p>}
+        {preparedUserPrompt && <p>{preparedUserPrompt}</p>}
         {chunk && <p>{chunk}</p>}
       </Alert>
     );
@@ -303,6 +352,76 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       <Alert key={`output-${i}`} variant="light" className="text-black mb-0">
         <Markdown>{output}</Markdown>
       </Alert>
+    );
+  });
+
+  const handleSetVariableValue = (variable: string, value: string) => {
+    const newVariableValues = { ...variableValues };
+    newVariableValues[variable] = value;
+    setVariableValues(newVariableValues);
+  };
+
+  const handleAddVariableOption = (variable: string, option: string) => {
+    const newVariableOptions = { ...variableOptions };
+    let newOptions = Array.isArray(newVariableOptions[variable]) ? newVariableOptions[variable] : [];
+    newOptions = [...new Set([...newOptions, option])].sort((a: string, b: string) =>
+      a.toLowerCase().localeCompare(b.toLowerCase()),
+    );
+    newVariableOptions[variable] = newOptions;
+    setVariableOptions(newVariableOptions);
+  };
+
+  const handleDeleteVariableOption = (variable: string, option: string) => {
+    const newVariableOptions = { ...variableOptions };
+    const newOptions: string[] = Array.isArray(newVariableOptions[variable]) ? newVariableOptions[variable] : [];
+    if (newOptions.includes(option)) {
+      newOptions.splice(newOptions.indexOf(option), 1);
+      newVariableOptions[variable] = newOptions;
+      setVariableOptions(newVariableOptions);
+    }
+    handleSetVariableValue(variable, '');
+  };
+
+  const variableElements = variables.map((variable, i) => {
+    const currVarValue = (variableValues ?? {})[variable] ?? '';
+    const currVarName = variable
+      .substring(2, variable.length - 2)
+      .split('_')
+      .join(' ');
+    const currVarOpts = Array.isArray(variableOptions[variable]) ? variableOptions[variable] : [];
+    const currValueOptionElements = currVarOpts.map((varValue: any, j: number) => (
+      <option key={`var-${i}-opt-${j}`} value={varValue}>
+        {varValue}
+      </option>
+    ));
+
+    return (
+      <div key={`variable-${i}`} className="d-flex gap-1 mb-1">
+        <Form.Control size="sm" type="text" disabled value={currVarName} style={{ width: 150 }} />
+        <Form.Control
+          type="text"
+          size="sm"
+          placeholder="Value"
+          value={currVarValue}
+          onChange={(e) => handleSetVariableValue(variable, e.target.value)}
+          style={{ width: 150 }}
+        />
+        <Form.Select
+          size="sm"
+          value={currVarValue}
+          onChange={(e) => handleSetVariableValue(variable, e.target.value)}
+          style={{ width: 0 }}
+        >
+          <option value=""></option>
+          {currValueOptionElements}
+        </Form.Select>
+        <Button variant="outline-primary" size="sm" onClick={() => handleAddVariableOption(variable, currVarValue)}>
+          <FaPlus className="mb-1" />
+        </Button>
+        <Button variant="outline-danger" size="sm" onClick={() => handleDeleteVariableOption(variable, currVarValue)}>
+          <FaTrashAlt className="mb-1" />
+        </Button>
+      </div>
     );
   });
 
@@ -320,7 +439,9 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     selectedPreset.requestMaxTokenRatio !== requestMaxTokenRatio ||
     selectedPreset.chunkOverlapWordCount !== chunkOverlapWordCount ||
     selectedPreset.chunkPrefix !== chunkPrefix ||
-    !!selectedPreset.autoShrink !== !!autoShrinkEnabled;
+    !!selectedPreset.autoShrink !== !!autoShrinkEnabled ||
+    JSON.stringify(selectedPreset.variableValues) !== JSON.stringify(variableValues ?? {}) ||
+    JSON.stringify(selectedPreset.variableOptions) !== JSON.stringify(variableOptions ?? {});
   const canSave = !!presetName.trim() && hasChanges;
   const configured = !!openAiModel && !!userPrompt;
   const canExecute = configured && !!input;
@@ -411,12 +532,12 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                     <div className="d-flex justify-content-between gap-2">
                       <Form.Text className="text-muted">
                         Provide the prompt used to process the text. The input text will be appended to the end of this
-                        prompt.
+                        prompt. You can optionally include variables in double curly braces, like so: {`{{Var_Name}}`}
                       </Form.Text>
                       <div className="d-flex align-items-center gap-1 small">
                         <Form.Text className="text-muted my-0">Tokens:</Form.Text>
                         <Badge pill bg="secondary">
-                          {TextUtils.getEstimatedTokenCount(userPrompt, averageTokenLength ?? 0)}
+                          {TextUtils.getEstimatedTokenCount(preparedUserPrompt, averageTokenLength ?? 0)}
                         </Badge>
                       </div>
                     </div>
@@ -516,6 +637,12 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                 </Accordion.Body>
               </Accordion.Item>
             </Accordion>
+            {variableElements.length > 0 && (
+              <Form.Group controlId="variables-group">
+                <Form.Label className="small fw-bold mb-1">Variables:</Form.Label>
+                {variableElements}
+              </Form.Group>
+            )}
             <Form.Group controlId="form-group-input-text">
               <Form.Label className="small fw-bold mb-1">Input Text</Form.Label>
               <Form.Control
@@ -525,21 +652,20 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                 rows={8}
                 value={input}
                 onChange={(e) => {
-                  if (autoShrinkEnabled) {
-                    setInput(TextUtils.shrinkText(e.target.value).substring(0, CHAR_LIMIT));
-                  } else {
-                    setInput(e.target.value.substring(0, CHAR_LIMIT));
-                  }
+                  handleSetInput(e.target.value);
                 }}
                 onFocus={handleInputTextFieldFocus}
               />
             </Form.Group>
             <div className="d-flex justify-content-between align-items-start gap-2">
               <div className="d-flex align-items-center gap-2">
+                <Button variant="outline-primary" size="sm" onClick={handlePaste}>
+                  Paste
+                </Button>
                 <Button variant="outline-danger" size="sm" onClick={handleClearInput} disabled={!hasInput}>
                   Clear
                 </Button>
-                <Button variant="outline-primary" size="sm" onClick={handleShrink} disabled={!hasInput}>
+                <Button variant="outline-secondary" size="sm" onClick={handleShrink} disabled={!hasInput}>
                   <div className="d-flex align-items-center gap-1">Shrink</div>
                 </Button>
                 <Form.Check

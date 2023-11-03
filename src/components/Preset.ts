@@ -8,6 +8,8 @@ export interface Preset {
   chunkOverlapWordCount: number;
   chunkPrefix: string;
   autoShrink: boolean;
+  variableValues: Record<string, string>;
+  variableOptions: Record<string, string[]>;
 }
 
 export const defaultPresets: Preset[] = [
@@ -22,6 +24,8 @@ export const defaultPresets: Preset[] = [
     chunkOverlapWordCount: 20,
     chunkPrefix: '(continued...) ',
     autoShrink: false,
+    variableValues: {},
+    variableOptions: {},
   },
   {
     name: 'Quick Summary',
@@ -33,6 +37,81 @@ export const defaultPresets: Preset[] = [
     chunkOverlapWordCount: 20,
     chunkPrefix: '(continued...) ',
     autoShrink: false,
+    variableValues: {},
+    variableOptions: {},
+  },
+  {
+    name: 'Translate Text',
+    aiModel: 'gpt-3.5-turbo',
+    systemPrompt: 'You are a helpful assistant.',
+    userPrompt: 'Translate the following from {{Start_Language}} to {{End_Language}}:',
+    averageTokenLength: 4.5,
+    requestMaxTokenRatio: 0.4,
+    chunkOverlapWordCount: 0,
+    chunkPrefix: '',
+    autoShrink: true,
+    variableValues: {
+      '{{Start_Language}}': 'English',
+      '{{End_Language}}': 'German',
+    },
+    variableOptions: {
+      '{{Start_Language}}': [
+        'Arabic',
+        'Bengali',
+        'Bulgarian',
+        'Catalan',
+        'Czech',
+        'Danish',
+        'Dutch',
+        'English',
+        'Estonian',
+        'Finnish',
+        'French',
+        'German',
+        'Greek',
+        'Hindi',
+        'Hungarian',
+        'Indonesian',
+        'Italian',
+        'Japanese',
+        'Korean',
+        'Mandarin Chinese',
+        'Polish',
+        'Portuguese',
+        'Russian',
+        'Spanish',
+        'Tamil',
+        'Turkish',
+      ],
+      '{{End_Language}}': [
+        'Arabic',
+        'Bengali',
+        'Bulgarian',
+        'Catalan',
+        'Czech',
+        'Danish',
+        'Dutch',
+        'English',
+        'Estonian',
+        'Finnish',
+        'French',
+        'German',
+        'Greek',
+        'Hindi',
+        'Hungarian',
+        'Indonesian',
+        'Italian',
+        'Japanese',
+        'Korean',
+        'Mandarin Chinese',
+        'Polish',
+        'Portuguese',
+        'Russian',
+        'Spanish',
+        'Tamil',
+        'Turkish',
+      ],
+    },
   },
   {
     name: 'YouTube Transcript Formatter',
@@ -45,6 +124,8 @@ export const defaultPresets: Preset[] = [
     chunkOverlapWordCount: 0,
     chunkPrefix: '',
     autoShrink: true,
+    variableValues: {},
+    variableOptions: {},
   },
 ];
 
