@@ -26,7 +26,33 @@
   "bugs": {
     "url": "https://github.com/justinmahar/ai-text-processor/issues"
   },
-  "keywords": [],
+  "keywords": [
+    "ai",
+    "openai",
+    "gpt",
+    "chatgpt",
+    "text",
+    "process",
+    "processor",
+    "processing",
+    "summary",
+    "summarize",
+    "summarization",
+    "extract",
+    "extractor",
+    "extraction",
+    "meaning",
+    "translate",
+    "transation",
+    "sentiment",
+    "analysis",
+    "data",
+    "chat",
+    "model",
+    "models",
+    "chunk",
+    "chunking"
+  ],
   "peerDependencies": {
     "react": "^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0",
     "react-dom": "^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0"
