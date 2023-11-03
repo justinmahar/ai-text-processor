@@ -388,13 +388,14 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       .substring(2, variable.length - 2)
       .split('_')
       .join(' ');
-    const currVarOpts = Array.isArray(variableOptions[variable]) ? variableOptions[variable] : [];
+    const currVarOpts: string[] = Array.isArray(variableOptions[variable]) ? variableOptions[variable] : [];
     const currValueOptionElements = currVarOpts.map((varValue: any, j: number) => (
       <option key={`var-${i}-opt-${j}`} value={varValue}>
         {varValue}
       </option>
     ));
-
+    const canAddVariableOption = !!currVarValue && !currVarOpts.includes(currVarValue);
+    const canDeleteVariableOption = !!currVarValue;
     return (
       <div key={`variable-${i}`} className="d-flex gap-1 mb-1">
         <Form.Control size="sm" type="text" disabled value={currVarName} style={{ width: 150 }} />
@@ -410,15 +411,25 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
           size="sm"
           value={currVarValue}
           onChange={(e) => handleSetVariableValue(variable, e.target.value)}
-          style={{ width: 0 }}
+          style={{ width: 20 }}
         >
           <option value=""></option>
           {currValueOptionElements}
         </Form.Select>
-        <Button variant="outline-primary" size="sm" onClick={() => handleAddVariableOption(variable, currVarValue)}>
+        <Button
+          variant="outline-primary"
+          size="sm"
+          onClick={() => handleAddVariableOption(variable, currVarValue)}
+          disabled={!canAddVariableOption}
+        >
           <FaPlus className="mb-1" />
         </Button>
-        <Button variant="outline-danger" size="sm" onClick={() => handleDeleteVariableOption(variable, currVarValue)}>
+        <Button
+          variant="outline-danger"
+          size="sm"
+          onClick={() => handleDeleteVariableOption(variable, currVarValue)}
+          disabled={!canDeleteVariableOption}
+        >
           <FaTrashAlt className="mb-1" />
         </Button>
       </div>
