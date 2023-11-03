@@ -53,6 +53,7 @@ If this project helped you, please consider buying me a coffee. Your support is 
 - [Donate](#donate)
 - [Table of Contents](#table-of-contents)
 - [Quick Start](#quick-start)
+- [Use Cases](#use-cases)
 - [TypeScript](#typescript)
 - [Icon Attribution](#icon-attribution)
 - [Contributing](#contributing)
@@ -64,6 +65,16 @@ If this project helped you, please consider buying me a coffee. Your support is 
 This utility is a static webapp hosted on GitHub Pages.
 
 [Click here to open the utility.](https://justinmahar.github.io/ai-text-processor/?path=/story/utilities-ai-text-processor--processor)
+
+## Use Cases
+
+This utility supports variety of use cases, including (but certainly not limited to) the following:
+
+- **Summarization** - Summarize large amounts of text.
+- **Analysis** - Analyze text using specified criteria. Possibilities are endless, from sentiment analysis to finding bugs in software.
+- **Data Extraction** - Extract key data from large amounts of text.
+- **Language Translation** - Translate text from one language to another.
+- **Text Formatting** - Format output text using specified criteria.
 
 ## TypeScript
 
