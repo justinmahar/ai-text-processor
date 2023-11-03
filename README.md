@@ -4,9 +4,9 @@
 <h3 align="center">
   Utility for processing text using AI.
 </h3>
-<h5 align="center">
+<h4 align="center">
   Summarize, analyze, extract, translate, format, and more! ✨
-</h5>
+</h4>
 <p align="center">
   <a href="https://badge.fury.io/js/ai-text-processor" target="_blank" rel="noopener noreferrer"><img src="https://badge.fury.io/js/ai-text-processor.svg" alt="npm Version" /></a>&nbsp;
   <a href="https://github.com/justinmahar/ai-text-processor/" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/GitHub-Source-success" alt="View project on GitHub" /></a>&nbsp;
