@@ -122,7 +122,7 @@ export const Settings = ({ ...props }: SettingsProps) => {
                     <div className="d-flex align-items-center gap-1">
                       <Form.Control
                         type="text"
-                        placeholder="Name"
+                        placeholder="Display name"
                         value={newOpenAiModelName}
                         onChange={(e) => setNewOpenAiModelName(e.target.value)}
                       />
@@ -148,6 +148,10 @@ export const Settings = ({ ...props }: SettingsProps) => {
                       </Button>
                     </div>
                   </div>
+                  <Form.Text className="text-muted">
+                    Supports all OpenAI chat models (legacy not supported). Enter a display name, model ID, and the max
+                    number of tokens for the model.
+                  </Form.Text>
                 </Card.Body>
               </Card>
             </Card.Body>
