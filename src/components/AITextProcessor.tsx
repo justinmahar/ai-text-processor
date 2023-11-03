@@ -45,6 +45,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const processingRef = React.useRef(false);
   const outputsRef = React.useRef<string[]>([]);
   const inputTextFieldRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const retryingRef = React.useRef(false);
 
   const chunks = TextUtils.getChunks(
     `${systemPrompt}`,
@@ -77,8 +78,11 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
           },
           onDone(xhr) {
             setXhr(undefined);
-            if (processingRef.current) {
-              processChunk(chunkIndex + 1);
+            setRenderTime(Date.now());
+            if (processingRef.current && !retryingRef.current) {
+              setTimeout(() => {
+                processChunk(chunkIndex + 1);
+              }, 1000);
             }
           },
           onError(error, status, xhr) {
@@ -126,6 +130,22 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     processingRef.current = false;
     xhr?.abort();
     setRenderTime(Date.now());
+  };
+
+  const handleRetryChunk = () => {
+    retryingRef.current = true;
+    xhr?.abort();
+    errorsRef.current = [];
+    processingRef.current = true;
+    const newOutputs = outputsRef.current.slice(0, currentChunkIndex);
+    outputsRef.current = newOutputs;
+    setOutputs(newOutputs);
+    setRenderTime(Date.now());
+    setTimeout(() => {
+      retryingRef.current = false;
+      setRenderTime(Date.now());
+      processChunk(currentChunkIndex);
+    }, 1000);
   };
 
   const handleClearInput = () => {
@@ -276,13 +296,16 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     );
   });
 
-  const outputElements = (outputs ?? []).map((output, i) => {
+  const outputElements = (outputs ?? []).map((output, i, arr) => {
     return (
-      <Alert key={`output-${i}`} variant="light" className="text-black">
+      <Alert key={`output-${i}`} variant="light" className="text-black mb-0">
         <Markdown>{output}</Markdown>
       </Alert>
     );
   });
+
+  const showProcessingAlert =
+    processingRef.current && ((outputs ?? []).length < currentChunkIndex + 1 || retryingRef.current);
 
   const selectedPreset = (mergedPresets ?? {})[selectedPresetName];
   const hasChanges =
@@ -574,19 +597,28 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
           </div>
         </Card.Body>
       </Card>
-      {(xhr || (outputs ?? []).length > 0) && (
+      {(xhr || processingRef.current || errorsRef.current.length > 0 || (outputs ?? []).length > 0) && (
         <div className="d-flex flex-column gap-1">
           <Card>
             <Card.Header className="d-flex justify-content-between align-items-center gap-2">
               <div className="d-flex align-items-center gap-2">
-                Output
                 {processingRef.current && (
                   <div className="d-flex align-items-center gap-2">
                     <Spinner animation="border" role="status" size="sm" />
-                    <div className="small fw-bold">
-                      Chunk {currentChunkIndex + 1} of {chunks.length}...
-                    </div>
                   </div>
+                )}
+                Output
+                {processingRef.current && (
+                  <div className="d-flex align-items-center gap-2">
+                    <Badge bg="secondary" className="small fw-bold">
+                      Chunk {currentChunkIndex + 1} of {chunks.length}...
+                    </Badge>
+                  </div>
+                )}
+                {currentChunkIndex >= 0 && (
+                  <Button variant="outline-primary" size="sm" onClick={handleRetryChunk} disabled={retryingRef.current}>
+                    Retry Chunk
+                  </Button>
                 )}
               </div>
               <div className="d-flex align-items-center gap-2">
@@ -606,10 +638,17 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                 </Button>
               </div>
             </Card.Header>
-            <Card.Body>
+            <Card.Body className="d-flex flex-column gap-2">
               {!outputs && <Spinner animation="border" role="status" size="sm" />}
               {outputs && showRawOutput && <pre>{outputs.join('\n\n')}</pre>}
               {outputs && !showRawOutput && outputElements}
+              {showProcessingAlert && (
+                <Alert variant="light" className="text-black mb-0">
+                  <div className="d-flex align-items-center small gap-2">
+                    <Spinner animation="border" role="status" size="sm" /> Processing chunk {currentChunkIndex + 1}...
+                  </div>
+                </Alert>
+              )}
             </Card.Body>
           </Card>
           <div className="d-flex justify-content-end">
