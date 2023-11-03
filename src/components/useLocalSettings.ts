@@ -65,7 +65,7 @@ export const useLocalSettings = () => {
       LocalSettingsDefaults[LocalSettingsKeys.openAiKey],
       storageOptions,
     ),
-    [LocalSettingsKeys.processors]: useLocalStorage<Record<string, any>>(
+    [LocalSettingsKeys.processors]: useLocalStorage<Record<string, TextProcessor>>(
       LocalSettingsKeys.processors,
       LocalSettingsDefaults[LocalSettingsKeys.processors],
       storageOptions,
@@ -150,9 +150,13 @@ export const useLocalSettings = () => {
 
 export type LocalSettingsType = ReturnType<typeof useLocalSettings>;
 
-export interface Processor {
+export interface TextProcessor {
   name: string;
-  ai: string;
-  modelId: string;
-  prompt: string;
+  aiModel: string;
+  systemPrompt: string;
+  userPrompt: string;
+  averageTokenLength: number;
+  requestMaxTokenRatio: number;
+  chunkOverlapWordCount: number;
+  chunkPrefix: string;
 }

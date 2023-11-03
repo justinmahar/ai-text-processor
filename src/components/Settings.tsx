@@ -14,11 +14,9 @@ export const Settings = ({ ...props }: SettingsProps) => {
   const [openAiKey, setOpenAiKey] = localSettings[LocalSettingsKeys.openAiKey];
   const [showOpenAiKey, setShowOpenAiKey] = React.useState(false);
   const [customOpenAiModels, setCustomOpenAiModels] = localSettings[LocalSettingsKeys.customOpenAiModels];
-  const [renderTime, setRenderTime] = React.useState(0);
   const [newOpenAiModelName, setNewOpenAiModelName] = React.useState('');
   const [newOpenAiModelId, setNewOpenAiModelId] = React.useState('');
   const [newOpenAiModelMaxTokens, setNewOpenAiModelMaxTokens] = React.useState('');
-  const [newOpenAiModelAvgTokenLength, setNewOpenAiModelAvgTokenLength] = React.useState('');
   const [averageTokenLength, setAverageTokenLength] = localSettings[LocalSettingsKeys.averageTokenLength];
   const [requestMaxTokenRatio, setRequestMaxTokenRatio] = localSettings[LocalSettingsKeys.requestMaxTokenRatio];
   const [chunkOverlapWordCount, setChunkOverlapWordCount] = localSettings[LocalSettingsKeys.chunkOverlapWordCount];
@@ -42,7 +40,6 @@ export const Settings = ({ ...props }: SettingsProps) => {
       name: newOpenAiModelName,
       id: newOpenAiModelId,
       maxTokens: parseInt(newOpenAiModelMaxTokens),
-      avgTokenLength: parseFloat(newOpenAiModelAvgTokenLength),
     });
     setCustomOpenAiModels(newCustomOpenAiModels);
     setNewOpenAiModelName('');
@@ -71,16 +68,6 @@ export const Settings = ({ ...props }: SettingsProps) => {
           value={model.maxTokens}
           disabled={true}
           style={{ width: 150 }}
-        />
-        <Form.Control
-          type="number"
-          min={1}
-          step={0.5}
-          placeholder="Avg Len"
-          value={model.avgTokenLength}
-          disabled={true}
-          readOnly
-          style={{ width: 80 }}
         />
         <Button variant="outline-danger" disabled={disabled} onClick={() => handleDeleteOpenAiModel(model.id)}>
           <FaTrashAlt />
@@ -156,15 +143,6 @@ export const Settings = ({ ...props }: SettingsProps) => {
                         onChange={(e) => setNewOpenAiModelMaxTokens(e.target.value)}
                         style={{ width: 150 }}
                       />
-                      <Form.Control
-                        type="number"
-                        min={1}
-                        step={0.5}
-                        placeholder="Avg Len"
-                        value={newOpenAiModelAvgTokenLength}
-                        onChange={(e) => setNewOpenAiModelAvgTokenLength(e.target.value)}
-                        style={{ width: 80 }}
-                      />
                       <Button variant="outline-primary" onClick={handleAddNewOpenAiModel} disabled={!canAddOpenAiModel}>
                         <FaPlus />
                       </Button>
@@ -177,59 +155,6 @@ export const Settings = ({ ...props }: SettingsProps) => {
           <Card>
             <Card.Header>Text Processing</Card.Header>
             <Card.Body className="d-flex flex-column gap-2">
-              <Form.Group controlId="form-group-averageTokenLength">
-                <Form.Label className="small fw-bold mb-1">Average token length:</Form.Label>
-                <Form.Control
-                  type="number"
-                  min={0}
-                  step={0.1}
-                  value={averageTokenLength}
-                  onChange={(e) => setAverageTokenLength(parseFloat(e.target.value))}
-                />
-                <Form.Text className="text-muted">
-                  This value will be used to estimate the amount of tokens for a given request. Use OpenAI's{' '}
-                  <a href="https://platform.openai.com/tokenizer">tokenizer</a> to estimate this value by dividing
-                  characters by tokens for a given input. OpenAI suggests <code>4</code> as a conservative average.
-                </Form.Text>
-              </Form.Group>
-              <Form.Group controlId="form-group-requestMaxTokenRatio">
-                <Form.Label className="small fw-bold mb-1">Request max token ratio:</Form.Label>
-                <Form.Control
-                  type="number"
-                  min={0}
-                  step={0.1}
-                  value={requestMaxTokenRatio}
-                  onChange={(e) => setRequestMaxTokenRatio(parseFloat(e.target.value))}
-                />
-                <Form.Text className="text-muted">
-                  Requests will not send more than this ratio of the max tokens for a model, and will be chunked if
-                  exceeded. For example, if the ratio is 0.6 (60%), and the max tokens for a given model is 4000, each
-                  request (chunk) will have 2400 tokens max. This would leave about 1600 tokens for a meaningful
-                  response, per request. For each chunk, we want to make sure there is still a decent amount of tokens
-                  left for the response.
-                </Form.Text>
-              </Form.Group>
-              <Form.Group controlId="form-group-chunkOverlapWordCount">
-                <Form.Label className="small fw-bold mb-1">Chunk overlap word count:</Form.Label>
-                <Form.Control
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={chunkOverlapWordCount}
-                  onChange={(e) => setChunkOverlapWordCount(parseInt(e.target.value))}
-                />
-                <Form.Text className="text-muted">
-                  When chunking, chunks will overlap by this many words to help preserve meaning. Words are delimited by
-                  spaces.
-                </Form.Text>
-              </Form.Group>
-              <Form.Group controlId="form-group-chunkPrefix">
-                <Form.Label className="small fw-bold mb-1">Chunk prefix:</Form.Label>
-                <Form.Control type="text" value={chunkPrefix} onChange={(e) => setChunkPrefix(e.target.value)} />
-                <Form.Text className="text-muted">
-                  When chunking, subsequent chunks will be prefixed with this text to indicate a continuation.
-                </Form.Text>
-              </Form.Group>
               <Form.Check
                 label="Show chunk inspector"
                 className="user-select-none"

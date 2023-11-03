@@ -20,7 +20,7 @@ import { useMomentaryBool } from 'react-use-precision-timer';
 import { Markdown } from './Markdown';
 import { AIModel, defaultOpenAiModels } from './open-ai-models';
 import { TextUtils } from './TextUtils';
-import { LocalSettingsKeys, useLocalSettings } from './useLocalSettings';
+import { LocalSettingsDefaults, LocalSettingsKeys, TextProcessor, useLocalSettings } from './useLocalSettings';
 
 export interface ProcessorProps extends DivProps {}
 
@@ -42,10 +42,10 @@ export const Processor = ({ ...props }: ProcessorProps) => {
   const errorsRef = React.useRef<any[]>([]);
   const [renderTime, setRenderTime] = React.useState(0);
   const [selectedProcessorName, setSelectedProcessorName] = localSettings[LocalSettingsKeys.selectedProcessorName];
-  const [averageTokenLength] = localSettings[LocalSettingsKeys.averageTokenLength];
-  const [requestMaxTokenRatio] = localSettings[LocalSettingsKeys.requestMaxTokenRatio];
-  const [chunkOverlapWordCount] = localSettings[LocalSettingsKeys.chunkOverlapWordCount];
-  const [chunkPrefix] = localSettings[LocalSettingsKeys.chunkPrefix];
+  const [averageTokenLength, setAverageTokenLength] = localSettings[LocalSettingsKeys.averageTokenLength];
+  const [requestMaxTokenRatio, setRequestMaxTokenRatio] = localSettings[LocalSettingsKeys.requestMaxTokenRatio];
+  const [chunkOverlapWordCount, setChunkOverlapWordCount] = localSettings[LocalSettingsKeys.chunkOverlapWordCount];
+  const [chunkPrefix, setChunkPrefix] = localSettings[LocalSettingsKeys.chunkPrefix];
   const [showChunkInspector] = localSettings[LocalSettingsKeys.showChunkInspector];
   const [autoScrubEnabled, setAutoScrubEnabled] = localSettings[LocalSettingsKeys.autoScrubEnabled];
   const currentOpenAiModelInfo = mergedOpenAiModels.find((m) => m.id === openAiModel);
@@ -147,29 +147,47 @@ export const Processor = ({ ...props }: ProcessorProps) => {
   const handleSelectProcessor = (processorName: string) => {
     if (!processorName) {
       setSelectedProcessorName('');
-      setProcessorName('');
-      setOpenAiModel(defaultOpenAiModels[0].id);
-      setSystemPrompt('You are a helpful assistant.');
-      setUserPrompt('');
+      setProcessorName(LocalSettingsDefaults[LocalSettingsKeys.processorName]);
+      setOpenAiModel(LocalSettingsDefaults[LocalSettingsKeys.openAiModel]);
+      setSystemPrompt(LocalSettingsDefaults[LocalSettingsKeys.systemPrompt]);
+      setUserPrompt(LocalSettingsDefaults[LocalSettingsKeys.userPrompt]);
+      setAverageTokenLength(LocalSettingsDefaults[LocalSettingsKeys.averageTokenLength]);
+      setRequestMaxTokenRatio(LocalSettingsDefaults[LocalSettingsKeys.requestMaxTokenRatio]);
+      setChunkOverlapWordCount(LocalSettingsDefaults[LocalSettingsKeys.chunkOverlapWordCount]);
+      setChunkPrefix(LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
     } else {
       const selectedProcessor = (processors ?? {})[processorName];
       if (selectedProcessor) {
         setSelectedProcessorName(processorName);
-        setProcessorName(selectedProcessor.name ?? '');
-        setOpenAiModel(selectedProcessor.aiModel ?? '');
-        setSystemPrompt(selectedProcessor.systemPrompt ?? '');
-        setUserPrompt(selectedProcessor.userPrompt ?? '');
+        setProcessorName(selectedProcessor.name ?? LocalSettingsDefaults[LocalSettingsKeys.processorName]);
+        setOpenAiModel(selectedProcessor.aiModel ?? LocalSettingsDefaults[LocalSettingsKeys.openAiModel]);
+        setSystemPrompt(selectedProcessor.systemPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.systemPrompt]);
+        setUserPrompt(selectedProcessor.userPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.userPrompt]);
+        setAverageTokenLength(
+          selectedProcessor.averageTokenLength ?? LocalSettingsDefaults[LocalSettingsKeys.averageTokenLength],
+        );
+        setRequestMaxTokenRatio(
+          selectedProcessor.requestMaxTokenRatio ?? LocalSettingsDefaults[LocalSettingsKeys.requestMaxTokenRatio],
+        );
+        setChunkOverlapWordCount(
+          selectedProcessor.chunkOverlapWordCount ?? LocalSettingsDefaults[LocalSettingsKeys.chunkOverlapWordCount],
+        );
+        setChunkPrefix(selectedProcessor.chunkPrefix ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
         inputTextFieldRef.current?.select();
       }
     }
   };
 
   const handleSaveProcessor = () => {
-    const processorToSave = {
+    const processorToSave: TextProcessor = {
       name: processorName,
       aiModel: openAiModel,
       systemPrompt: systemPrompt,
       userPrompt: userPrompt,
+      averageTokenLength,
+      requestMaxTokenRatio,
+      chunkOverlapWordCount,
+      chunkPrefix,
     };
     const newProcessors: Record<string, any> = { ...(processors ?? {}), [processorToSave.name]: processorToSave };
     const newProcessorsSorted: Record<string, any> = {};
@@ -246,17 +264,23 @@ export const Processor = ({ ...props }: ProcessorProps) => {
   const chunkElements = chunks.map((chunk, i) => {
     return (
       <Alert key={`chunk-${i}`} variant="secondary">
+        <div className="d-flex align-items-center justify-content-between gap-2">
+          <h6 className="mb-0">
+            <Badge bg="secondary">Chunk #{i + 1}</Badge>
+          </h6>
+          <div className="d-flex align-items-center gap-2 fw-bold">
+            <div>Tokens:</div>
+            <div>
+              <Badge pill bg="secondary">
+                {TextUtils.getEstimatedTokenCount(systemPrompt + userPrompt + chunk, averageTokenLength ?? 0)}
+              </Badge>
+            </div>
+          </div>
+        </div>
+        <hr />
         {systemPrompt && <p>{systemPrompt}</p>}
         {userPrompt && <p>{userPrompt}</p>}
         {chunk && <p>{chunk}</p>}
-        <div className="d-flex align-items-center gap-2 fw-bold">
-          <div>Tokens:</div>
-          <div>
-            <Badge pill bg="secondary">
-              {TextUtils.getEstimatedTokenCount(systemPrompt + userPrompt + chunk, averageTokenLength ?? 0)}
-            </Badge>
-          </div>
-        </div>
       </Alert>
     );
   });
@@ -362,6 +386,77 @@ export const Processor = ({ ...props }: ProcessorProps) => {
                       </div>
                     </div>
                   </Form.Group>
+                  <Accordion defaultActiveKey="0">
+                    <Accordion.Item eventKey="0">
+                      <Accordion.Header>Advanced Config</Accordion.Header>
+                      <Accordion.Body>
+                        <Form.Group controlId="form-group-averageTokenLength">
+                          <Form.Label className="small fw-bold mb-1">Average token length:</Form.Label>
+                          <Form.Control
+                            type="number"
+                            min={0}
+                            step={0.1}
+                            value={averageTokenLength}
+                            onChange={(e) => setAverageTokenLength(parseFloat(e.target.value))}
+                          />
+                          <Form.Text className="text-muted">
+                            This value will be used to estimate the amount of tokens for a given request. Use OpenAI's{' '}
+                            <a href="https://platform.openai.com/tokenizer">tokenizer</a> to estimate this value by
+                            dividing characters by tokens for a given input. OpenAI suggests <code>4</code> as a
+                            conservative average.
+                          </Form.Text>
+                        </Form.Group>
+                        <Form.Group controlId="form-group-requestMaxTokenRatio">
+                          <Form.Label className="small fw-bold mb-1">Request max token ratio:</Form.Label>
+                          <Form.Control
+                            type="number"
+                            min={0}
+                            step={0.1}
+                            max={0.99}
+                            value={requestMaxTokenRatio}
+                            onChange={(e) => setRequestMaxTokenRatio(parseFloat(e.target.value))}
+                          />
+                          <Form.Text className="text-muted">
+                            Requests will not send more than this ratio of the max tokens for the model, and will be
+                            chunked if exceeded. If the ratio is {requestMaxTokenRatio} (
+                            {`${Math.round(requestMaxTokenRatio * 100)}%`}), and the max tokens for the model is{' '}
+                            {currentOpenAiModelInfo?.maxTokens ?? 4000}, each request (chunk) will have{' '}
+                            {Math.ceil((currentOpenAiModelInfo?.maxTokens ?? 4000) * requestMaxTokenRatio)} tokens max.
+                            This would leave about{' '}
+                            {(currentOpenAiModelInfo?.maxTokens ?? 4000) -
+                              Math.ceil((currentOpenAiModelInfo?.maxTokens ?? 4000) * requestMaxTokenRatio)}{' '}
+                            tokens for a meaningful response, per request. For each chunk, we want to make sure there is
+                            still a decent amount of tokens left for the response.
+                          </Form.Text>
+                        </Form.Group>
+                        <Form.Group controlId="form-group-chunkOverlapWordCount">
+                          <Form.Label className="small fw-bold mb-1">Chunk overlap word count:</Form.Label>
+                          <Form.Control
+                            type="number"
+                            min={0}
+                            step={1}
+                            value={chunkOverlapWordCount}
+                            onChange={(e) => setChunkOverlapWordCount(parseInt(e.target.value))}
+                          />
+                          <Form.Text className="text-muted">
+                            When chunking, chunks will overlap by this many words to help preserve meaning. Words are
+                            delimited by spaces.
+                          </Form.Text>
+                        </Form.Group>
+                        <Form.Group controlId="form-group-chunkPrefix">
+                          <Form.Label className="small fw-bold mb-1">Chunk prefix:</Form.Label>
+                          <Form.Control
+                            type="text"
+                            value={chunkPrefix}
+                            onChange={(e) => setChunkPrefix(e.target.value)}
+                          />
+                          <Form.Text className="text-muted">
+                            When chunking, subsequent chunks will be prefixed with this text to indicate a continuation.
+                          </Form.Text>
+                        </Form.Group>
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  </Accordion>
                   <div className="d-flex justify-content-end gap-2">
                     <Button variant="outline-primary" onClick={handleSaveProcessor} disabled={!canSave}>
                       <FaSave className="mb-1" />
@@ -437,7 +532,10 @@ export const Processor = ({ ...props }: ProcessorProps) => {
                       </Badge>
                     </div>
                   </Accordion.Header>
-                  <Accordion.Body>{chunkElements}</Accordion.Body>
+                  <Accordion.Body>
+                    {chunkElements}
+                    {chunkElements.length === 0 && <div>No chunks to display.</div>}
+                  </Accordion.Body>
                 </Accordion.Item>
               </Accordion>
             )}
