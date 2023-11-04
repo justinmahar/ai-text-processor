@@ -418,7 +418,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
           onChange={(e) => handleSetVariableValue(variable, e.target.value)}
           style={{ width: 20 }}
         >
-          <option value=""></option>
+          {(canAddVariableOption || !currVarValue) && <option value={currVarValue}>{currVarValue || '(empty)'}</option>}
           {currValueOptionElements}
         </Form.Select>
         <Button
