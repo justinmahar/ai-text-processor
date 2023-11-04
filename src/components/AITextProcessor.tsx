@@ -64,7 +64,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
 
   let preparedUserPrompt: string = userPrompt ?? '';
   variables.forEach((variable) => {
-    const replacement = variableValues[variable] ?? '';
+    const replacement = (variableValues ?? {})[variable] ?? '';
     preparedUserPrompt = preparedUserPrompt.split(variable).join(replacement);
   });
 
@@ -216,26 +216,26 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       setVariableValues(LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
       setVariableOptions(LocalSettingsDefaults[LocalSettingsKeys.variableOptions]);
     } else {
-      const selectedPreset = (mergedPresets ?? {})[presetName];
-      if (selectedPreset) {
+      const chosenPreset: Preset | undefined = (mergedPresets ?? {})[presetName];
+      if (chosenPreset) {
         setSelectedPresetName(presetName);
-        setPresetName(selectedPreset.name ?? LocalSettingsDefaults[LocalSettingsKeys.presetName]);
-        setOpenAiModel(selectedPreset.aiModel ?? LocalSettingsDefaults[LocalSettingsKeys.openAiModel]);
-        setSystemPrompt(selectedPreset.systemPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.systemPrompt]);
-        setUserPrompt(selectedPreset.userPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.userPrompt]);
+        setPresetName(chosenPreset?.name ?? LocalSettingsDefaults[LocalSettingsKeys.presetName]);
+        setOpenAiModel(chosenPreset?.aiModel ?? LocalSettingsDefaults[LocalSettingsKeys.openAiModel]);
+        setSystemPrompt(chosenPreset?.systemPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.systemPrompt]);
+        setUserPrompt(chosenPreset?.userPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.userPrompt]);
         setAverageTokenLength(
-          selectedPreset.averageTokenLength ?? LocalSettingsDefaults[LocalSettingsKeys.averageTokenLength],
+          chosenPreset?.averageTokenLength ?? LocalSettingsDefaults[LocalSettingsKeys.averageTokenLength],
         );
         setRequestMaxTokenRatio(
-          selectedPreset.requestMaxTokenRatio ?? LocalSettingsDefaults[LocalSettingsKeys.requestMaxTokenRatio],
+          chosenPreset?.requestMaxTokenRatio ?? LocalSettingsDefaults[LocalSettingsKeys.requestMaxTokenRatio],
         );
         setChunkOverlapWordCount(
-          selectedPreset.chunkOverlapWordCount ?? LocalSettingsDefaults[LocalSettingsKeys.chunkOverlapWordCount],
+          chosenPreset?.chunkOverlapWordCount ?? LocalSettingsDefaults[LocalSettingsKeys.chunkOverlapWordCount],
         );
-        setChunkPrefix(selectedPreset.chunkPrefix ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
-        setAutoShrinkEnabled(selectedPreset.autoShrink ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
-        setVariableValues(selectedPreset.variableValues ?? LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
-        setVariableOptions(selectedPreset.variableOptions ?? LocalSettingsDefaults[LocalSettingsKeys.variableOptions]);
+        setChunkPrefix(chosenPreset?.chunkPrefix ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
+        setAutoShrinkEnabled(chosenPreset?.autoShrink ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
+        setVariableValues(chosenPreset?.variableValues ?? LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
+        setVariableOptions(chosenPreset?.variableOptions ?? LocalSettingsDefaults[LocalSettingsKeys.variableOptions]);
         inputTextFieldRef.current?.select();
       }
     }
@@ -439,21 +439,25 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const showProcessingAlert =
     processingRef.current && ((outputs ?? []).length < currentChunkIndex + 1 || retryingRef.current);
 
-  const selectedPreset = (mergedPresets ?? {})[selectedPresetName];
-  const hasChanges =
+  const selectedPreset: Preset | undefined = (mergedPresets ?? {})[selectedPresetName];
+  /** Has changes the user will be interested in saving. */
+  const hasMeaningfulChanges =
     !selectedPreset ||
-    (selectedPreset && selectedPreset.name !== presetName) ||
-    selectedPreset.aiModel !== openAiModel ||
-    selectedPreset.systemPrompt !== systemPrompt ||
-    selectedPreset.userPrompt !== userPrompt ||
-    selectedPreset.averageTokenLength !== averageTokenLength ||
-    selectedPreset.requestMaxTokenRatio !== requestMaxTokenRatio ||
-    selectedPreset.chunkOverlapWordCount !== chunkOverlapWordCount ||
-    selectedPreset.chunkPrefix !== chunkPrefix ||
-    !!selectedPreset.autoShrink !== !!autoShrinkEnabled ||
-    JSON.stringify(selectedPreset.variableValues) !== JSON.stringify(variableValues ?? {}) ||
-    JSON.stringify(selectedPreset.variableOptions) !== JSON.stringify(variableOptions ?? {});
-  const canSave = !!presetName.trim() && hasChanges;
+    (selectedPreset && selectedPreset?.name !== presetName) ||
+    selectedPreset?.aiModel !== openAiModel ||
+    selectedPreset?.systemPrompt !== systemPrompt ||
+    selectedPreset?.userPrompt !== userPrompt ||
+    selectedPreset?.averageTokenLength !== averageTokenLength ||
+    selectedPreset?.requestMaxTokenRatio !== requestMaxTokenRatio ||
+    selectedPreset?.chunkOverlapWordCount !== chunkOverlapWordCount ||
+    selectedPreset?.chunkPrefix !== chunkPrefix ||
+    !!selectedPreset?.autoShrink !== !!autoShrinkEnabled ||
+    JSON.stringify(selectedPreset?.variableOptions ?? {}) !== JSON.stringify(variableOptions ?? {});
+  /** Has changes the user might not necessarily be interested in saving. */
+  const hasSuperfluousChanges =
+    JSON.stringify(selectedPreset?.variableValues ?? {}) !== JSON.stringify(variableValues ?? {});
+  const showUnsavedNotification = !!presetName.trim() && hasMeaningfulChanges;
+  const canSave = !!presetName.trim() && (hasMeaningfulChanges || hasSuperfluousChanges);
   const configured = !!openAiModel && !!userPrompt;
   const canExecute = configured && !!input;
   const hasInput = (input ?? '').length > 0;
@@ -488,9 +492,36 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
             >
               <Accordion.Item eventKey="1">
                 <Accordion.Header>
-                  <div className="d-flex align-items-center gap-2">
-                    {!configured ? <FaWrench /> : <FaCheckSquare className="text-success" />} Preset Configuration
-                    {canSave && <Badge bg="primary">Unsaved</Badge>}
+                  <div className="d-flex justify-content-between gap-2 w-100 me-4">
+                    <div className="d-flex align-items-center gap-2">
+                      {!configured ? <FaWrench /> : <FaCheckSquare className="text-success" />} Preset Configuration
+                      {showUnsavedNotification && <Badge bg="primary">Unsaved</Badge>}
+                    </div>
+                    <div className="d-flex justify-content-end gap-2">
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={(e) => {
+                          handleSavePreset();
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        disabled={!canSave}
+                      >
+                        <FaSave className="mb-1" />
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={(e) => {
+                          handleDeletePreset();
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
+                        <FaTrashAlt className="mb-1" />
+                      </Button>
+                    </div>
                   </div>
                 </Accordion.Header>
                 <Accordion.Body className="d-flex flex-column gap-2">

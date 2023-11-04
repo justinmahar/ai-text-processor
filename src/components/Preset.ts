@@ -14,7 +14,7 @@ export interface Preset {
 
 export const defaultPresets: Preset[] = [
   {
-    name: 'Extract Data',
+    name: '📖 Extract Data',
     aiModel: 'gpt-3.5-turbo',
     systemPrompt: 'You are a helpful assistant.',
     userPrompt:
@@ -31,7 +31,7 @@ export const defaultPresets: Preset[] = [
     },
   },
   {
-    name: 'Summarize',
+    name: '📖 Summarize',
     aiModel: 'gpt-3.5-turbo',
     systemPrompt: 'You are a helpful assistant.',
     userPrompt: 'In {{Length_of_Summary}} or less, provide a concise summary of the following:',
@@ -44,7 +44,7 @@ export const defaultPresets: Preset[] = [
     variableOptions: { '{{Length_of_Summary}}': ['1 sentence', '1 paragraph', '2 paragraphs', '3 paragraphs'] },
   },
   {
-    name: 'Translate Text',
+    name: '📖 Translate Text',
     aiModel: 'gpt-3.5-turbo',
     systemPrompt: 'You are a helpful assistant.',
     userPrompt: 'Translate the following from {{Start_Language}} to {{End_Language}}:',
@@ -117,7 +117,7 @@ export const defaultPresets: Preset[] = [
     },
   },
   {
-    name: 'Format Text',
+    name: '📖 Format Text',
     aiModel: 'gpt-3.5-turbo',
     systemPrompt: 'You are a helpful assistant.',
     userPrompt:
