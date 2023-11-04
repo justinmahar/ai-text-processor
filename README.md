@@ -14,7 +14,7 @@
   <a href="https://github.com/sponsors/justinmahar" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86" alt="Sponsor"/></a>
 </p>
 
-![Screenshot of AI Text Processor extracting an apple pie recipe](https://raw.githubusercontent.com/justinmahar/ai-text-processor/master/screenshots/extract-data-screenshot-600.png)
+![Screenshot of AI Text Processor extracting an apple pie recipe](https://raw.githubusercontent.com/justinmahar/ai-text-processor/master/screenshots/extract-data-screenshot.webp)
 
 ## [→ Open The AI Text Processor ←](https://justinmahar.github.io/ai-text-processor/?path=/story/utilities-ai-text-processor--processor)
 
