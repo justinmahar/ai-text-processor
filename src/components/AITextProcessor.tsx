@@ -13,6 +13,7 @@ import {
   FaInfoCircle,
   FaPlus,
   FaSave,
+  FaTimes,
   FaTrash,
   FaTrashAlt,
   FaUndo,
@@ -64,6 +65,9 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const outputsRef = React.useRef<string[]>([]);
   const inputTextFieldRef = React.useRef<HTMLTextAreaElement | null>(null);
   const retryingRef = React.useRef(false);
+  const [showDeletePresetConfirmation, setShowDeletePresetConfirmation] = React.useState(false);
+  const [variableDeletionConfirmationIndex, setVariableDeletionConfirmationIndex] = React.useState(-1);
+  const [showDeleteOutputConfirmation, setShowDeleteOutputConfirmation] = React.useState(false);
 
   let preparedUserPrompt: string = userPrompt ?? '';
   variables.forEach((variable) => {
@@ -172,6 +176,11 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     }, 1000);
   };
 
+  const handleSetUserPrompt = (text: string) => {
+    setUserPrompt(text);
+    setVariableDeletionConfirmationIndex(-1);
+  };
+
   const handleSetInput = (text: string) => {
     if (autoShrinkEnabled) {
       setInput(TextUtils.shrinkText(text).substring(0, CHAR_LIMIT));
@@ -241,9 +250,9 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
         setAutoShrinkEnabled(chosenPreset?.autoShrink ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
         setVariableValues(chosenPreset?.variableValues ?? LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
         setVariableOptions(chosenPreset?.variableOptions ?? LocalSettingsDefaults[LocalSettingsKeys.variableOptions]);
-        inputTextFieldRef.current?.select();
       }
     }
+    setVariableDeletionConfirmationIndex(-1);
   };
 
   const handleSavePreset = () => {
@@ -269,12 +278,21 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   };
 
   const handleDeletePreset = () => {
+    setShowDeletePresetConfirmation(true);
+  };
+
+  const handleConfirmDeletePreset = () => {
     if (selectedPresetName) {
       const newPresets = { ...(mergedPresets ?? {}) };
       delete newPresets[selectedPresetName];
       setPresets(newPresets);
     }
     handleSelectPreset('');
+    setShowDeletePresetConfirmation(false);
+  };
+
+  const handleCancelDeletePreset = () => {
+    setShowDeletePresetConfirmation(false);
   };
 
   const handleResetPreset = () => {
@@ -286,7 +304,11 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     toggleCopied();
   };
 
-  const handleClear = () => {
+  const handleDeleteOutput = () => {
+    setShowDeleteOutputConfirmation(true);
+  };
+
+  const handleConfirmDeleteOutput = () => {
     setOutputs([]);
     outputsRef.current = [];
     errorsRef.current = [];
@@ -294,6 +316,11 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     xhr?.abort();
     processingRef.current = false;
     setXhr(undefined);
+    setShowDeleteOutputConfirmation(false);
+  };
+
+  const handleCancelDeleteOutput = () => {
+    setShowDeleteOutputConfirmation(false);
   };
 
   const handleInputTextFieldFocus = () => {
@@ -336,7 +363,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const chunkElements = chunks.map((chunk, i) => {
     return (
       <Alert key={`chunk-${i}`} variant="secondary">
-        <div className="d-flex align-items-center justify-content-between gap-2">
+        <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
           <h6 className="mb-0">
             <Badge bg="secondary">Chunk #{i + 1}</Badge>
           </h6>
@@ -360,7 +387,10 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const outputElements = (outputs ?? []).map((output, i, arr) => {
     return (
       <Alert key={`output-${i}`} variant="light" className="text-black mb-0">
-        <Markdown>{output}</Markdown>
+        <Markdown>
+          {output}
+          {output && processingRef.current ? '│' : ''}
+        </Markdown>
       </Alert>
     );
   });
@@ -381,7 +411,11 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     setVariableOptions(newVariableOptions);
   };
 
-  const handleDeleteVariableOption = (variable: string, option: string) => {
+  const handleDeleteVariableOption = (variableIndex: number) => {
+    setVariableDeletionConfirmationIndex(variableIndex);
+  };
+
+  const handleConfirmDeleteVariableOption = (variable: string, option: string) => {
     const newVariableOptions = { ...variableOptions };
     const newOptions: string[] = Array.isArray(newVariableOptions[variable]) ? newVariableOptions[variable] : [];
     if (newOptions.includes(option)) {
@@ -390,6 +424,11 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       setVariableOptions(newVariableOptions);
     }
     handleSetVariableValue(variable, '');
+    setVariableDeletionConfirmationIndex(-1);
+  };
+
+  const handleCancelDeleteVariableOption = () => {
+    setVariableDeletionConfirmationIndex(-1);
   };
 
   const variableElements = variables.map((variable, i) => {
@@ -399,11 +438,6 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       .split('_')
       .join(' ');
     const currVarOpts: string[] = Array.isArray(variableOptions[variable]) ? variableOptions[variable] : [];
-    const currValueOptionElements = currVarOpts.map((varValue: any, j: number) => (
-      <option key={`var-${i}-opt-${j}`} value={varValue}>
-        {varValue}
-      </option>
-    ));
     const currValueDropdownItemElements = currVarOpts.map((varValue: any, j: number) => (
       <Dropdown.Item key={`var-${i}-dropdown-item-${j}`} onClick={() => handleSetVariableValue(variable, varValue)}>
         {varValue}
@@ -412,7 +446,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     const canAddVariableOption = !!currVarValue && !currVarOpts.includes(currVarValue);
     const canDeleteVariableOption = !!currVarValue;
     return (
-      <div key={`variable-${i}`} className="d-flex gap-1 mb-1">
+      <div key={`variable-${i}`} className="d-flex flex-wrap gap-1 mb-1">
         <Form.Control size="sm" type="text" disabled value={currVarName} style={{ width: 150 }} />
         <Dropdown as={ButtonGroup}>
           <Form.Control
@@ -434,14 +468,38 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
         >
           <FaPlus className="mb-1" />
         </Button>
-        <Button
-          variant="outline-danger"
-          size="sm"
-          onClick={() => handleDeleteVariableOption(variable, currVarValue)}
-          disabled={!canDeleteVariableOption}
-        >
-          <FaTrashAlt className="mb-1" />
-        </Button>
+        {i !== variableDeletionConfirmationIndex && (
+          <Button
+            variant="outline-danger"
+            size="sm"
+            onClick={() => handleDeleteVariableOption(i)}
+            disabled={!canDeleteVariableOption}
+          >
+            <FaTrashAlt className="mb-1" />
+          </Button>
+        )}
+        {i === variableDeletionConfirmationIndex && (
+          <div className="d-flex align-items-center gap-1">
+            <Button
+              size="sm"
+              variant="outline-danger"
+              onClick={(e) => {
+                handleConfirmDeleteVariableOption(variable, currVarValue);
+              }}
+            >
+              <FaCheck className="mb-1" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-secondary"
+              onClick={(e) => {
+                handleCancelDeleteVariableOption();
+              }}
+            >
+              <FaTimes className="mb-1" />
+            </Button>
+          </div>
+        )}
       </div>
     );
   });
@@ -510,8 +568,8 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
             >
               <Accordion.Item eventKey="1">
                 <Accordion.Header>
-                  <div className="d-flex justify-content-between gap-2 w-100 me-4">
-                    <div className="d-flex align-items-center gap-2">
+                  <div className="d-flex flex-wrap justify-content-between gap-2 w-100 me-4">
+                    <div className="d-flex flex-wrap align-items-center gap-2">
                       {!configured ? <FaWrench /> : <FaCheckSquare className="text-success" />} Preset Configuration
                       {showUnsavedNotification && <Badge bg="primary">Unsaved</Badge>}
                     </div>
@@ -540,17 +598,45 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                       >
                         <FaUndo className="mb-1" />
                       </Button>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={(e) => {
-                          handleDeletePreset();
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                      >
-                        <FaTrashAlt className="mb-1" />
-                      </Button>
+                      {!showDeletePresetConfirmation && (
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={(e) => {
+                            handleDeletePreset();
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                        >
+                          <FaTrashAlt className="mb-1" />
+                        </Button>
+                      )}
+                      {showDeletePresetConfirmation && (
+                        <div className="d-flex align-items-center gap-1">
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={(e) => {
+                              handleConfirmDeletePreset();
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                          >
+                            <FaCheck className="mb-1" />
+                          </Button>
+                          <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            onClick={(e) => {
+                              handleCancelDeletePreset();
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                          >
+                            <FaTimes className="mb-1" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Accordion.Header>
@@ -609,7 +695,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                       placeholder="Enter the user prompt"
                       rows={3}
                       value={userPrompt}
-                      onChange={(e) => setUserPrompt(e.target.value)}
+                      onChange={(e) => handleSetUserPrompt(e.target.value)}
                     />
                     <div className="d-flex justify-content-between gap-2">
                       <Form.Text className="text-muted">
@@ -715,9 +801,36 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                     <Button variant="outline-secondary" onClick={handleResetPreset} disabled={!canReset}>
                       <FaUndo className="mb-1" />
                     </Button>
-                    <Button variant="outline-danger" onClick={handleDeletePreset}>
-                      <FaTrashAlt className="mb-1" />
-                    </Button>
+                    {!showDeletePresetConfirmation && (
+                      <Button
+                        variant="outline-danger"
+                        onClick={(e) => {
+                          handleDeletePreset();
+                        }}
+                      >
+                        <FaTrashAlt className="mb-1" />
+                      </Button>
+                    )}
+                    {showDeletePresetConfirmation && (
+                      <div className="d-flex align-items-center gap-1">
+                        <Button
+                          variant="outline-danger"
+                          onClick={(e) => {
+                            handleConfirmDeletePreset();
+                          }}
+                        >
+                          <FaCheck className="mb-1" />
+                        </Button>
+                        <Button
+                          variant="outline-secondary"
+                          onClick={(e) => {
+                            handleCancelDeletePreset();
+                          }}
+                        >
+                          <FaTimes className="mb-1" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </Accordion.Body>
               </Accordion.Item>
@@ -742,8 +855,8 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                 onFocus={handleInputTextFieldFocus}
               />
             </Form.Group>
-            <div className="d-flex justify-content-between align-items-start gap-2">
-              <div className="d-flex align-items-center gap-2">
+            <div className="d-flex flex-wrap justify-content-between align-items-start gap-2">
+              <div className="d-flex flex-wrap align-items-center gap-2">
                 <Button variant="outline-primary" size="sm" onClick={handlePaste}>
                   Paste
                 </Button>
@@ -818,8 +931,8 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       {(xhr || processingRef.current || errorsRef.current.length > 0 || (outputs ?? []).length > 0) && (
         <div className="d-flex flex-column gap-1">
           <Card>
-            <Card.Header className="d-flex justify-content-between align-items-center gap-2">
-              <div className="d-flex align-items-center gap-2">
+            <Card.Header className="d-flex flex-wrap justify-content-between align-items-center gap-2">
+              <div className="d-flex flex-wrap align-items-center gap-2">
                 {processingRef.current && (
                   <div className="d-flex align-items-center gap-2">
                     <Spinner animation="border" role="status" size="sm" />
@@ -848,12 +961,24 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                   checked={showRawOutput}
                   onChange={(e) => setShowRawOutput(e.target.checked)}
                 />
-                <Button variant="outline-primary" onClick={handleCopy}>
+                <Button size="sm" variant="outline-primary" onClick={handleCopy}>
                   {copied ? <FaCheck className="mb-1" /> : <FaCopy className="mb-1" />}
                 </Button>
-                <Button variant="outline-danger" onClick={handleClear}>
-                  <FaTrash className="mb-1" />
-                </Button>
+                {!showDeleteOutputConfirmation && (
+                  <Button size="sm" variant="outline-danger" onClick={handleDeleteOutput}>
+                    <FaTrash className="mb-1" />
+                  </Button>
+                )}
+                {showDeleteOutputConfirmation && (
+                  <div className="d-flex align-items-center gap-1">
+                    <Button size="sm" variant="outline-danger" onClick={handleConfirmDeleteOutput}>
+                      <FaCheck className="mb-1" />
+                    </Button>
+                    <Button size="sm" variant="outline-secondary" onClick={handleCancelDeleteOutput}>
+                      <FaTimes className="mb-1" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </Card.Header>
             <Card.Body className="d-flex flex-column gap-2">
