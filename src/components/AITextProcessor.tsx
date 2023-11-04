@@ -387,10 +387,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const outputElements = (outputs ?? []).map((output, i, arr) => {
     return (
       <Alert key={`output-${i}`} variant="light" className="text-black mb-0">
-        <Markdown>
-          {output}
-          {output && processingRef.current ? '│' : ''}
-        </Markdown>
+        <Markdown>{output && processingRef.current ? `${output}│` : `${output}`}</Markdown>
       </Alert>
     );
   });
