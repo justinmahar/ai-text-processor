@@ -107,7 +107,7 @@ export const ImportExportModal = ({ show, setShow, ...props }: ImportExportModal
               }}
             />
           </div>
-          <div className="d-flex align-items-center gap-2">
+          <div className="d-flex flex-wrap align-items-center gap-2">
             <Button variant="primary" onClick={handleCopy}>
               {copied ? 'Copied!' : 'Copy'}
             </Button>

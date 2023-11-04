@@ -45,31 +45,44 @@ export const Settings = ({ ...props }: SettingsProps) => {
     setNewOpenAiModelMaxTokens('');
   };
 
-  const aiModelElements = mergedOpenAiModelInfos.map((model, i) => {
+  const aiModelElements = mergedOpenAiModelInfos.map((model, i, arr) => {
     const disabled = !(customOpenAiModelInfos ?? []).find((m: AIModelInfo) => m.id === model.id);
     return (
-      <div key={`model-${i}`} className="d-flex align-items-center gap-1">
-        <Form.Control type="text" placeholder="Name" value={model.name} disabled={true} readOnly />
-        <Form.Control
-          type="text"
-          placeholder="Model ID"
-          className="font-monospace"
-          value={model.id}
-          disabled={true}
-          readOnly
-        />
-        <Form.Control
-          type="number"
-          min={0}
-          step={1}
-          placeholder="Max Tokens"
-          value={model.maxTokens}
-          disabled={true}
-          style={{ width: 150 }}
-        />
-        <Button variant="outline-danger" disabled={disabled} onClick={() => handleDeleteOpenAiModel(model.id)}>
-          <FaTrashAlt />
-        </Button>
+      <div key={`model-${i}`} className="d-flex flex-column gap-1">
+        <div className="d-flex flex-wrap align-items-center gap-1">
+          <Form.Control
+            type="text"
+            placeholder="Name"
+            value={model.name}
+            disabled={true}
+            style={{ maxWidth: 200 }}
+            className="w-100"
+            readOnly
+          />
+          <Form.Control
+            type="text"
+            placeholder="Model ID"
+            className="font-monospace w-100"
+            value={model.id}
+            disabled={true}
+            style={{ maxWidth: 200 }}
+            readOnly
+          />
+          <Form.Control
+            type="number"
+            min={0}
+            step={1}
+            placeholder="Max Tokens"
+            value={model.maxTokens}
+            disabled={true}
+            style={{ maxWidth: 150 }}
+            className="w-100"
+          />
+          <Button variant="outline-danger" disabled={disabled} onClick={() => handleDeleteOpenAiModel(model.id)}>
+            <FaTrashAlt />
+          </Button>
+        </div>
+        {i < arr.length - 1 && <hr className="my-1" />}
       </div>
     );
   });
@@ -119,19 +132,23 @@ export const Settings = ({ ...props }: SettingsProps) => {
                 <Card.Body>
                   <div className="d-flex flex-column gap-1">
                     {aiModelElements}
-                    <div className="d-flex align-items-center gap-1">
+                    {aiModelElements.length > 0 && <hr className="my-1" />}
+                    <div className="d-flex flex-wrap align-items-center gap-1">
                       <Form.Control
                         type="text"
                         placeholder="Display name"
                         value={newOpenAiModelName}
+                        style={{ maxWidth: 200 }}
+                        className="w-100"
                         onChange={(e) => setNewOpenAiModelName(e.target.value)}
                       />
                       <Form.Control
                         type="text"
                         placeholder="Model ID"
-                        className="font-monospace"
+                        className="font-monospace w-100"
                         // style={{ fontSize: '80%' }}
                         value={newOpenAiModelId}
+                        style={{ maxWidth: 200 }}
                         onChange={(e) => setNewOpenAiModelId(e.target.value)}
                       />
                       <Form.Control
@@ -141,7 +158,8 @@ export const Settings = ({ ...props }: SettingsProps) => {
                         placeholder="Max Tokens"
                         value={newOpenAiModelMaxTokens}
                         onChange={(e) => setNewOpenAiModelMaxTokens(e.target.value)}
-                        style={{ width: 150 }}
+                        style={{ maxWidth: 150 }}
+                        className="w-100"
                       />
                       <Button variant="outline-primary" onClick={handleAddNewOpenAiModel} disabled={!canAddOpenAiModel}>
                         <FaPlus />
