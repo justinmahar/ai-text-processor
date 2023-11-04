@@ -509,6 +509,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const hasMeaningfulChanges =
     !selectedPreset ||
     (selectedPreset && selectedPreset?.name !== presetName) ||
+    selectedPreset?.description !== presetDescription ||
     selectedPreset?.aiModel !== openAiModel ||
     selectedPreset?.systemPrompt !== systemPrompt ||
     selectedPreset?.userPrompt !== userPrompt ||
