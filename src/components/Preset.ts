@@ -1,5 +1,6 @@
 export interface Preset {
   name: string;
+  description: string;
   aiModel: string;
   systemPrompt: string;
   userPrompt: string;
@@ -15,23 +16,30 @@ export interface Preset {
 export const defaultPresets: Preset[] = [
   {
     name: '📖 Extract Data',
+    description: 'Extracts data from a body of text.',
     aiModel: 'gpt-3.5-turbo',
     systemPrompt: 'You are a helpful assistant.',
     userPrompt:
-      'Extract, condense, and distill the {{Data_To_Extract}} from the following {{Document_Type}}, and list them. Do not provide a heading or commentary. Here is the {{Document_Type}}:',
+      'Extract {{Data_To_Extract}} from the following {{Document_Type}}, and format the results as {{Formatted_As}}. Do not provide a heading or commentary. Here is the {{Document_Type}}:',
     averageTokenLength: 4.5,
     requestMaxTokenRatio: 0.7,
     chunkOverlapWordCount: 20,
     chunkPrefix: '(continued...) ',
     autoShrink: false,
-    variableValues: { '{{Data_To_Extract}}': 'main points', '{{Document_Type}}': 'text' },
+    variableValues: {
+      '{{Data_To_Extract}}': 'the main points',
+      '{{Document_Type}}': 'text',
+      '{{Formatted_As}}': 'bullet points',
+    },
     variableOptions: {
-      '{{Data_To_Extract}}': ['key ideas', 'main points', 'strategies'],
+      '{{Data_To_Extract}}': ['the key ideas', 'the main points', 'the strategies'],
       '{{Document_Type}}': ['text', 'video transcript'],
+      '{{Formatted_As}}': ['a numbered list', 'a markdown table', 'bullet points'],
     },
   },
   {
     name: '📖 Summarize',
+    description: 'Summarizes a body of text.',
     aiModel: 'gpt-3.5-turbo',
     systemPrompt: 'You are a helpful assistant.',
     userPrompt: 'In {{Length_of_Summary}} or less, provide a concise summary of the following:',
@@ -45,6 +53,7 @@ export const defaultPresets: Preset[] = [
   },
   {
     name: '📖 Translate Text',
+    description: 'Translates text from one language to another.',
     aiModel: 'gpt-3.5-turbo',
     systemPrompt: 'You are a helpful assistant.',
     userPrompt: 'Translate the following from {{Start_Language}} to {{End_Language}}:',
@@ -118,10 +127,11 @@ export const defaultPresets: Preset[] = [
   },
   {
     name: '📖 Format Text',
+    description: 'Adds capitalization and punctuation to a body of text, without changing any words.',
     aiModel: 'gpt-3.5-turbo',
     systemPrompt: 'You are a helpful assistant.',
     userPrompt:
-      'For the following {{Document_Type}}, add punctuation and capitalize the sentences for the text. Do not change the text in any other way and do NOT add or change any words. Here is the {{Document_Type}}:',
+      'For the following {{Document_Type}}, add punctuation and capitalize the sentences of the text. Do not change the text in any other way and do NOT add or change any words. Here is the {{Document_Type}}:',
     averageTokenLength: 4.5,
     requestMaxTokenRatio: 0.4,
     chunkOverlapWordCount: 0,

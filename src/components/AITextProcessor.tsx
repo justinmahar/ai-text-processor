@@ -10,6 +10,7 @@ import {
   FaCheck,
   FaCheckSquare,
   FaCopy,
+  FaInfoCircle,
   FaPlus,
   FaSave,
   FaTrash,
@@ -32,6 +33,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const [presets, setPresets] = localSettings[LocalSettingsKeys.presets];
   const mergedPresets = toSortedPresetsMap([...Object.values(defaultPresetsMap), ...Object.values(presets ?? {})]);
   const [presetName, setPresetName] = localSettings[LocalSettingsKeys.presetName];
+  const [presetDescription, setPresetDescription] = localSettings[LocalSettingsKeys.presetDescription];
   const [openAiModel, setOpenAiModel] = localSettings[LocalSettingsKeys.openAiModel];
   const [systemPrompt, setSystemPrompt] = localSettings[LocalSettingsKeys.systemPrompt];
   const [userPrompt, setUserPrompt] = localSettings[LocalSettingsKeys.userPrompt];
@@ -205,6 +207,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     if (!presetName) {
       setSelectedPresetName('');
       setPresetName(LocalSettingsDefaults[LocalSettingsKeys.presetName]);
+      setPresetDescription(LocalSettingsDefaults[LocalSettingsKeys.presetDescription]);
       setOpenAiModel(LocalSettingsDefaults[LocalSettingsKeys.openAiModel]);
       setSystemPrompt(LocalSettingsDefaults[LocalSettingsKeys.systemPrompt]);
       setUserPrompt(LocalSettingsDefaults[LocalSettingsKeys.userPrompt]);
@@ -220,6 +223,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       if (chosenPreset) {
         setSelectedPresetName(presetName);
         setPresetName(chosenPreset?.name ?? LocalSettingsDefaults[LocalSettingsKeys.presetName]);
+        setPresetDescription(chosenPreset?.description ?? LocalSettingsDefaults[LocalSettingsKeys.presetDescription]);
         setOpenAiModel(chosenPreset?.aiModel ?? LocalSettingsDefaults[LocalSettingsKeys.openAiModel]);
         setSystemPrompt(chosenPreset?.systemPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.systemPrompt]);
         setUserPrompt(chosenPreset?.userPrompt ?? LocalSettingsDefaults[LocalSettingsKeys.userPrompt]);
@@ -244,6 +248,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const handleSavePreset = () => {
     const presetToSave: Preset = {
       name: presetName,
+      description: presetDescription,
       aiModel: openAiModel,
       systemPrompt: systemPrompt,
       userPrompt: userPrompt,
@@ -486,6 +491,13 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                 Select a preset, or choose New Preset to create a new one. Note that default presets cannot be deleted.
               </Form.Text>
             </Form.Group>
+            {presetDescription && (
+              <Alert variant="info" className="mb-0 py-1">
+                <div className="d-flex gap-2">
+                  <FaInfoCircle className="mt-1" /> {presetDescription}
+                </div>
+              </Alert>
+            )}
             <Accordion
               key={`accordion-${!selectedPresetName ? 'new' : 'saved'}`}
               defaultActiveKey={!selectedPresetName ? '1' : undefined}
@@ -497,7 +509,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                       {!configured ? <FaWrench /> : <FaCheckSquare className="text-success" />} Preset Configuration
                       {showUnsavedNotification && <Badge bg="primary">Unsaved</Badge>}
                     </div>
-                    <div className="d-flex justify-content-end gap-2">
+                    <div className="d-flex justify-content-end gap-2" onClick={(e) => e.stopPropagation()}>
                       <Button
                         variant="outline-primary"
                         size="sm"
@@ -534,6 +546,16 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                       onChange={(e) => setPresetName(e.target.value)}
                     />
                     <Form.Text className="text-muted">Provide a name for this preset.</Form.Text>
+                  </Form.Group>
+                  <Form.Group controlId="name-group">
+                    <Form.Label className="small fw-bold mb-1">Description</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter a description"
+                      value={presetDescription}
+                      onChange={(e) => setPresetDescription(e.target.value)}
+                    />
+                    <Form.Text className="text-muted">Provide an optional description for this preset.</Form.Text>
                   </Form.Group>
                   <Form.Group controlId="model-group">
                     <Form.Label className="small fw-bold mb-1">AI Model</Form.Label>

@@ -13,6 +13,7 @@ export enum LocalSettingsKeys {
   selectedPresetName = 'selectedPresetName',
   customOpenAiModelInfos = 'customOpenAiModelInfos',
   presetName = 'presetName',
+  presetDescription = 'presetDescription',
   openAiModel = 'openAiModel',
   systemPrompt = 'systemPrompt',
   userPrompt = 'userPrompt',
@@ -36,6 +37,7 @@ export const LocalSettingsDefaults = {
   [LocalSettingsKeys.selectedPresetName]: '',
   [LocalSettingsKeys.customOpenAiModelInfos]: [] as AIModelInfo[],
   [LocalSettingsKeys.presetName]: '',
+  [LocalSettingsKeys.presetDescription]: '',
   [LocalSettingsKeys.openAiModel]: defaultOpenAiModelInfos[0].id,
   [LocalSettingsKeys.systemPrompt]: 'You are a helpful assistant.',
   [LocalSettingsKeys.userPrompt]: '',
@@ -88,6 +90,11 @@ export const useLocalSettings = () => {
     [LocalSettingsKeys.presetName]: useLocalStorage(
       LocalSettingsKeys.presetName,
       LocalSettingsDefaults[LocalSettingsKeys.presetName],
+      storageOptions,
+    ),
+    [LocalSettingsKeys.presetDescription]: useLocalStorage(
+      LocalSettingsKeys.presetDescription,
+      LocalSettingsDefaults[LocalSettingsKeys.presetDescription],
       storageOptions,
     ),
     [LocalSettingsKeys.openAiModel]: useLocalStorage(
