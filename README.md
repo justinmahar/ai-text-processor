@@ -18,7 +18,7 @@
   <a href="https://justinmahar.github.io/ai-text-processor/?path=/story/utilities-ai-text-processor--processor"><img src="https://raw.githubusercontent.com/justinmahar/ai-text-processor/master/screenshots/extract-data-screenshot.webp" alt="Screenshot of AI Text Processor extracting an apple pie recipe" width="450" /></a>
 </p>
 
-## [→ Open The AI Text Processor ←](https://justinmahar.github.io/ai-text-processor/?path=/story/utilities-ai-text-processor--processor)
+<h2 align="center"><a href="https://justinmahar.github.io/ai-text-processor/?path=/story/utilities-ai-text-processor--processor">→ Open The AI Text Processor ←</a></h2>
 
 ## Overview
 
@@ -57,7 +57,6 @@ If this project helped you, please consider buying me a coffee. Your support is 
 
 ## Table of Contents 
 
-- [→ Open The AI Text Processor ←](#-open-the-ai-text-processor-)
 - [Overview](#overview)
   - [Features include:](#features-include)
 - [Donate](#donate)
