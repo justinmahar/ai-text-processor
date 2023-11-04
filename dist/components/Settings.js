@@ -55,14 +55,16 @@ const Settings = (_a) => {
         setNewOpenAiModelId('');
         setNewOpenAiModelMaxTokens('');
     };
-    const aiModelElements = mergedOpenAiModelInfos.map((model, i) => {
+    const aiModelElements = mergedOpenAiModelInfos.map((model, i, arr) => {
         const disabled = !(customOpenAiModelInfos !== null && customOpenAiModelInfos !== void 0 ? customOpenAiModelInfos : []).find((m) => m.id === model.id);
-        return (react_1.default.createElement("div", { key: `model-${i}`, className: "d-flex align-items-center gap-1" },
-            react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", placeholder: "Name", value: model.name, disabled: true, readOnly: true }),
-            react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", placeholder: "Model ID", className: "font-monospace", value: model.id, disabled: true, readOnly: true }),
-            react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "number", min: 0, step: 1, placeholder: "Max Tokens", value: model.maxTokens, disabled: true, style: { width: 150 } }),
-            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", disabled: disabled, onClick: () => handleDeleteOpenAiModel(model.id) },
-                react_1.default.createElement(fa_1.FaTrashAlt, null))));
+        return (react_1.default.createElement("div", { key: `model-${i}`, className: "d-flex flex-column gap-1" },
+            react_1.default.createElement("div", { className: "d-flex flex-wrap align-items-center gap-1" },
+                react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", placeholder: "Name", value: model.name, disabled: true, style: { maxWidth: 200 }, className: "w-100", readOnly: true }),
+                react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", placeholder: "Model ID", className: "font-monospace w-100", value: model.id, disabled: true, style: { maxWidth: 200 }, readOnly: true }),
+                react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "number", min: 0, step: 1, placeholder: "Max Tokens", value: model.maxTokens, disabled: true, style: { maxWidth: 150 }, className: "w-100" }),
+                react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", disabled: disabled, onClick: () => handleDeleteOpenAiModel(model.id) },
+                    react_1.default.createElement(fa_1.FaTrashAlt, null))),
+            i < arr.length - 1 && react_1.default.createElement("hr", { className: "my-1" })));
     });
     const canAddOpenAiModel = !mergedOpenAiModelInfos.find((m) => m.id === newOpenAiModelId) &&
         newOpenAiModelName &&
@@ -94,12 +96,13 @@ const Settings = (_a) => {
                             react_1.default.createElement(react_bootstrap_1.Card.Body, null,
                                 react_1.default.createElement("div", { className: "d-flex flex-column gap-1" },
                                     aiModelElements,
-                                    react_1.default.createElement("div", { className: "d-flex align-items-center gap-1" },
-                                        react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", placeholder: "Display name", value: newOpenAiModelName, onChange: (e) => setNewOpenAiModelName(e.target.value) }),
-                                        react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", placeholder: "Model ID", className: "font-monospace", 
+                                    aiModelElements.length > 0 && react_1.default.createElement("hr", { className: "my-1" }),
+                                    react_1.default.createElement("div", { className: "d-flex flex-wrap align-items-center gap-1" },
+                                        react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", placeholder: "Display name", value: newOpenAiModelName, style: { maxWidth: 200 }, className: "w-100", onChange: (e) => setNewOpenAiModelName(e.target.value) }),
+                                        react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", placeholder: "Model ID", className: "font-monospace w-100", 
                                             // style={{ fontSize: '80%' }}
-                                            value: newOpenAiModelId, onChange: (e) => setNewOpenAiModelId(e.target.value) }),
-                                        react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "number", min: 0, step: 1, placeholder: "Max Tokens", value: newOpenAiModelMaxTokens, onChange: (e) => setNewOpenAiModelMaxTokens(e.target.value), style: { width: 150 } }),
+                                            value: newOpenAiModelId, style: { maxWidth: 200 }, onChange: (e) => setNewOpenAiModelId(e.target.value) }),
+                                        react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "number", min: 0, step: 1, placeholder: "Max Tokens", value: newOpenAiModelMaxTokens, onChange: (e) => setNewOpenAiModelMaxTokens(e.target.value), style: { maxWidth: 150 }, className: "w-100" }),
                                         react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", onClick: handleAddNewOpenAiModel, disabled: !canAddOpenAiModel },
                                             react_1.default.createElement(fa_1.FaPlus, null)))),
                                 react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted" }, "Supports all OpenAI chat models (legacy not supported). Enter a display name, model ID, and the max number of tokens for the model."))))),

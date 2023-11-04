@@ -94,7 +94,7 @@ const ImportExportModal = (_a) => {
                             var _a;
                             (_a = enteredValueTextAreaRef.current) === null || _a === void 0 ? void 0 : _a.select();
                         } })),
-                react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
+                react_1.default.createElement("div", { className: "d-flex flex-wrap align-items-center gap-2" },
                     react_1.default.createElement(react_bootstrap_1.Button, { variant: "primary", onClick: handleCopy }, copied ? 'Copied!' : 'Copy'),
                     react_1.default.createElement(react_bootstrap_1.Button, { variant: "primary", onClick: handleImport, disabled: !canImport }, "Import"),
                     react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", onClick: handleReset, disabled: !canReset }, "Reset")),

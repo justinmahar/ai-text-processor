@@ -19,6 +19,7 @@ var LocalSettingsKeys;
     LocalSettingsKeys["selectedPresetName"] = "selectedPresetName";
     LocalSettingsKeys["customOpenAiModelInfos"] = "customOpenAiModelInfos";
     LocalSettingsKeys["presetName"] = "presetName";
+    LocalSettingsKeys["presetDescription"] = "presetDescription";
     LocalSettingsKeys["openAiModel"] = "openAiModel";
     LocalSettingsKeys["systemPrompt"] = "systemPrompt";
     LocalSettingsKeys["userPrompt"] = "userPrompt";
@@ -41,6 +42,7 @@ exports.LocalSettingsDefaults = {
     [LocalSettingsKeys.selectedPresetName]: '',
     [LocalSettingsKeys.customOpenAiModelInfos]: [],
     [LocalSettingsKeys.presetName]: '',
+    [LocalSettingsKeys.presetDescription]: '',
     [LocalSettingsKeys.openAiModel]: AIModelInfo_1.defaultOpenAiModelInfos[0].id,
     [LocalSettingsKeys.systemPrompt]: 'You are a helpful assistant.',
     [LocalSettingsKeys.userPrompt]: '',
@@ -69,6 +71,7 @@ const useLocalSettings = () => {
         [LocalSettingsKeys.selectedPresetName]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.selectedPresetName, exports.LocalSettingsDefaults[LocalSettingsKeys.selectedPresetName], storageOptions),
         [LocalSettingsKeys.customOpenAiModelInfos]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.customOpenAiModelInfos, exports.LocalSettingsDefaults[LocalSettingsKeys.customOpenAiModelInfos], storageOptions),
         [LocalSettingsKeys.presetName]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.presetName, exports.LocalSettingsDefaults[LocalSettingsKeys.presetName], storageOptions),
+        [LocalSettingsKeys.presetDescription]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.presetDescription, exports.LocalSettingsDefaults[LocalSettingsKeys.presetDescription], storageOptions),
         [LocalSettingsKeys.openAiModel]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.openAiModel, exports.LocalSettingsDefaults[LocalSettingsKeys.openAiModel], storageOptions),
         [LocalSettingsKeys.systemPrompt]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.systemPrompt, exports.LocalSettingsDefaults[LocalSettingsKeys.systemPrompt], storageOptions),
         [LocalSettingsKeys.userPrompt]: (0, react_storage_complete_1.useLocalStorage)(LocalSettingsKeys.userPrompt, exports.LocalSettingsDefaults[LocalSettingsKeys.userPrompt], storageOptions),

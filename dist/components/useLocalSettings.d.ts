@@ -10,6 +10,7 @@ export declare enum LocalSettingsKeys {
     selectedPresetName = "selectedPresetName",
     customOpenAiModelInfos = "customOpenAiModelInfos",
     presetName = "presetName",
+    presetDescription = "presetDescription",
     openAiModel = "openAiModel",
     systemPrompt = "systemPrompt",
     userPrompt = "userPrompt",
@@ -32,6 +33,7 @@ export declare const LocalSettingsDefaults: {
     selectedPresetName: string;
     customOpenAiModelInfos: AIModelInfo[];
     presetName: string;
+    presetDescription: string;
     openAiModel: string;
     systemPrompt: string;
     userPrompt: string;
@@ -54,6 +56,7 @@ export declare const useLocalSettings: () => {
     selectedPresetName: import("react-storage-complete").StorageState<any>;
     customOpenAiModelInfos: import("react-storage-complete").StorageState<AIModelInfo[]>;
     presetName: import("react-storage-complete").StorageState<any>;
+    presetDescription: import("react-storage-complete").StorageState<any>;
     openAiModel: import("react-storage-complete").StorageState<any>;
     systemPrompt: import("react-storage-complete").StorageState<any>;
     userPrompt: import("react-storage-complete").StorageState<any>;

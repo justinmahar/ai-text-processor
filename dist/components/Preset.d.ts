@@ -1,5 +1,6 @@
 export interface Preset {
     name: string;
+    description: string;
     aiModel: string;
     systemPrompt: string;
     userPrompt: string;

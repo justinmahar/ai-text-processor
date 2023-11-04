@@ -30,12 +30,13 @@ const AIModelInfo_1 = require("./AIModelInfo");
 const useLocalSettings_1 = require("./useLocalSettings");
 exports.CHAR_LIMIT = 2000000;
 const AITextProcessor = (_a) => {
-    var _b, _c, _d, _e, _f, _g, _h;
+    var _b, _c, _d, _e, _f, _g, _h, _j, _k;
     var props = __rest(_a, []);
     const localSettings = (0, useLocalSettings_1.useLocalSettings)();
     const [presets, setPresets] = localSettings[useLocalSettings_1.LocalSettingsKeys.presets];
     const mergedPresets = (0, Preset_1.toSortedPresetsMap)([...Object.values(Preset_1.defaultPresetsMap), ...Object.values(presets !== null && presets !== void 0 ? presets : {})]);
     const [presetName, setPresetName] = localSettings[useLocalSettings_1.LocalSettingsKeys.presetName];
+    const [presetDescription, setPresetDescription] = localSettings[useLocalSettings_1.LocalSettingsKeys.presetDescription];
     const [openAiModel, setOpenAiModel] = localSettings[useLocalSettings_1.LocalSettingsKeys.openAiModel];
     const [systemPrompt, setSystemPrompt] = localSettings[useLocalSettings_1.LocalSettingsKeys.systemPrompt];
     const [userPrompt, setUserPrompt] = localSettings[useLocalSettings_1.LocalSettingsKeys.userPrompt];
@@ -65,10 +66,13 @@ const AITextProcessor = (_a) => {
     const outputsRef = react_1.default.useRef([]);
     const inputTextFieldRef = react_1.default.useRef(null);
     const retryingRef = react_1.default.useRef(false);
+    const [showDeletePresetConfirmation, setShowDeletePresetConfirmation] = react_1.default.useState(false);
+    const [variableDeletionConfirmationIndex, setVariableDeletionConfirmationIndex] = react_1.default.useState(-1);
+    const [showDeleteOutputConfirmation, setShowDeleteOutputConfirmation] = react_1.default.useState(false);
     let preparedUserPrompt = userPrompt !== null && userPrompt !== void 0 ? userPrompt : '';
     variables.forEach((variable) => {
         var _a;
-        const replacement = (_a = variableValues[variable]) !== null && _a !== void 0 ? _a : '';
+        const replacement = (_a = (variableValues !== null && variableValues !== void 0 ? variableValues : {})[variable]) !== null && _a !== void 0 ? _a : '';
         preparedUserPrompt = preparedUserPrompt.split(variable).join(replacement);
     });
     const chunks = TextUtils_1.TextUtils.getChunks(`${systemPrompt}`, `${preparedUserPrompt}`, `${input}`, (_c = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _c !== void 0 ? _c : 0, {
@@ -157,6 +161,10 @@ const AITextProcessor = (_a) => {
             processChunk(currentChunkIndex);
         }, 1000);
     };
+    const handleSetUserPrompt = (text) => {
+        setUserPrompt(text);
+        setVariableDeletionConfirmationIndex(-1);
+    };
     const handleSetInput = (text) => {
         if (autoShrinkEnabled) {
             setInput(TextUtils_1.TextUtils.shrinkText(text).substring(0, exports.CHAR_LIMIT));
@@ -191,6 +199,7 @@ const AITextProcessor = (_a) => {
         if (!presetName) {
             setSelectedPresetName('');
             setPresetName(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.presetName]);
+            setPresetDescription(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.presetDescription]);
             setOpenAiModel(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.openAiModel]);
             setSystemPrompt(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.systemPrompt]);
             setUserPrompt(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.userPrompt]);
@@ -203,27 +212,29 @@ const AITextProcessor = (_a) => {
             setVariableOptions(useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.variableOptions]);
         }
         else {
-            const selectedPreset = (mergedPresets !== null && mergedPresets !== void 0 ? mergedPresets : {})[presetName];
-            if (selectedPreset) {
+            const chosenPreset = (mergedPresets !== null && mergedPresets !== void 0 ? mergedPresets : {})[presetName];
+            if (chosenPreset) {
                 setSelectedPresetName(presetName);
-                setPresetName((_a = selectedPreset.name) !== null && _a !== void 0 ? _a : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.presetName]);
-                setOpenAiModel((_b = selectedPreset.aiModel) !== null && _b !== void 0 ? _b : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.openAiModel]);
-                setSystemPrompt((_c = selectedPreset.systemPrompt) !== null && _c !== void 0 ? _c : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.systemPrompt]);
-                setUserPrompt((_d = selectedPreset.userPrompt) !== null && _d !== void 0 ? _d : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.userPrompt]);
-                setAverageTokenLength((_e = selectedPreset.averageTokenLength) !== null && _e !== void 0 ? _e : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.averageTokenLength]);
-                setRequestMaxTokenRatio((_f = selectedPreset.requestMaxTokenRatio) !== null && _f !== void 0 ? _f : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.requestMaxTokenRatio]);
-                setChunkOverlapWordCount((_g = selectedPreset.chunkOverlapWordCount) !== null && _g !== void 0 ? _g : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.chunkOverlapWordCount]);
-                setChunkPrefix((_h = selectedPreset.chunkPrefix) !== null && _h !== void 0 ? _h : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.chunkPrefix]);
-                setAutoShrinkEnabled((_j = selectedPreset.autoShrink) !== null && _j !== void 0 ? _j : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.chunkPrefix]);
-                setVariableValues((_k = selectedPreset.variableValues) !== null && _k !== void 0 ? _k : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.variableValues]);
-                setVariableOptions((_l = selectedPreset.variableOptions) !== null && _l !== void 0 ? _l : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.variableOptions]);
-                (_m = inputTextFieldRef.current) === null || _m === void 0 ? void 0 : _m.select();
+                setPresetName((_a = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.name) !== null && _a !== void 0 ? _a : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.presetName]);
+                setPresetDescription((_b = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.description) !== null && _b !== void 0 ? _b : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.presetDescription]);
+                setOpenAiModel((_c = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.aiModel) !== null && _c !== void 0 ? _c : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.openAiModel]);
+                setSystemPrompt((_d = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.systemPrompt) !== null && _d !== void 0 ? _d : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.systemPrompt]);
+                setUserPrompt((_e = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.userPrompt) !== null && _e !== void 0 ? _e : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.userPrompt]);
+                setAverageTokenLength((_f = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.averageTokenLength) !== null && _f !== void 0 ? _f : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.averageTokenLength]);
+                setRequestMaxTokenRatio((_g = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.requestMaxTokenRatio) !== null && _g !== void 0 ? _g : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.requestMaxTokenRatio]);
+                setChunkOverlapWordCount((_h = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.chunkOverlapWordCount) !== null && _h !== void 0 ? _h : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.chunkOverlapWordCount]);
+                setChunkPrefix((_j = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.chunkPrefix) !== null && _j !== void 0 ? _j : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.chunkPrefix]);
+                setAutoShrinkEnabled((_k = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.autoShrink) !== null && _k !== void 0 ? _k : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.chunkPrefix]);
+                setVariableValues((_l = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.variableValues) !== null && _l !== void 0 ? _l : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.variableValues]);
+                setVariableOptions((_m = chosenPreset === null || chosenPreset === void 0 ? void 0 : chosenPreset.variableOptions) !== null && _m !== void 0 ? _m : useLocalSettings_1.LocalSettingsDefaults[useLocalSettings_1.LocalSettingsKeys.variableOptions]);
             }
         }
+        setVariableDeletionConfirmationIndex(-1);
     };
     const handleSavePreset = () => {
         const presetToSave = {
             name: presetName,
+            description: presetDescription,
             aiModel: openAiModel,
             systemPrompt: systemPrompt,
             userPrompt: userPrompt,
@@ -242,18 +253,31 @@ const AITextProcessor = (_a) => {
         setRenderTime(Date.now());
     };
     const handleDeletePreset = () => {
+        setShowDeletePresetConfirmation(true);
+    };
+    const handleConfirmDeletePreset = () => {
         if (selectedPresetName) {
             const newPresets = Object.assign({}, (mergedPresets !== null && mergedPresets !== void 0 ? mergedPresets : {}));
             delete newPresets[selectedPresetName];
             setPresets(newPresets);
         }
         handleSelectPreset('');
+        setShowDeletePresetConfirmation(false);
+    };
+    const handleCancelDeletePreset = () => {
+        setShowDeletePresetConfirmation(false);
+    };
+    const handleResetPreset = () => {
+        handleSelectPreset(selectedPresetName);
     };
     const handleCopy = () => {
         (0, copy_to_clipboard_1.default)((outputs !== null && outputs !== void 0 ? outputs : []).join('\n\n'));
         toggleCopied();
     };
-    const handleClear = () => {
+    const handleDeleteOutput = () => {
+        setShowDeleteOutputConfirmation(true);
+    };
+    const handleConfirmDeleteOutput = () => {
         setOutputs([]);
         outputsRef.current = [];
         errorsRef.current = [];
@@ -261,6 +285,10 @@ const AITextProcessor = (_a) => {
         xhr === null || xhr === void 0 ? void 0 : xhr.abort();
         processingRef.current = false;
         setXhr(undefined);
+        setShowDeleteOutputConfirmation(false);
+    };
+    const handleCancelDeleteOutput = () => {
+        setShowDeleteOutputConfirmation(false);
     };
     const handleInputTextFieldFocus = () => {
         var _a;
@@ -293,7 +321,7 @@ const AITextProcessor = (_a) => {
     });
     const chunkElements = chunks.map((chunk, i) => {
         return (react_1.default.createElement(react_bootstrap_1.Alert, { key: `chunk-${i}`, variant: "secondary" },
-            react_1.default.createElement("div", { className: "d-flex align-items-center justify-content-between gap-2" },
+            react_1.default.createElement("div", { className: "d-flex flex-wrap align-items-center justify-content-between gap-2" },
                 react_1.default.createElement("h6", { className: "mb-0" },
                     react_1.default.createElement(react_bootstrap_1.Badge, { bg: "secondary" },
                         "Chunk #",
@@ -309,7 +337,9 @@ const AITextProcessor = (_a) => {
     });
     const outputElements = (outputs !== null && outputs !== void 0 ? outputs : []).map((output, i, arr) => {
         return (react_1.default.createElement(react_bootstrap_1.Alert, { key: `output-${i}`, variant: "light", className: "text-black mb-0" },
-            react_1.default.createElement(Markdown_1.Markdown, null, output)));
+            react_1.default.createElement(Markdown_1.Markdown, null,
+                output,
+                output && processingRef.current ? '│' : '')));
     });
     const handleSetVariableValue = (variable, value) => {
         const newVariableValues = Object.assign({}, variableValues);
@@ -323,7 +353,10 @@ const AITextProcessor = (_a) => {
         newVariableOptions[variable] = newOptions;
         setVariableOptions(newVariableOptions);
     };
-    const handleDeleteVariableOption = (variable, option) => {
+    const handleDeleteVariableOption = (variableIndex) => {
+        setVariableDeletionConfirmationIndex(variableIndex);
+    };
+    const handleConfirmDeleteVariableOption = (variable, option) => {
         const newVariableOptions = Object.assign({}, variableOptions);
         const newOptions = Array.isArray(newVariableOptions[variable]) ? newVariableOptions[variable] : [];
         if (newOptions.includes(option)) {
@@ -332,6 +365,10 @@ const AITextProcessor = (_a) => {
             setVariableOptions(newVariableOptions);
         }
         handleSetVariableValue(variable, '');
+        setVariableDeletionConfirmationIndex(-1);
+    };
+    const handleCancelDeleteVariableOption = () => {
+        setVariableDeletionConfirmationIndex(-1);
     };
     const variableElements = variables.map((variable, i) => {
         var _a;
@@ -341,35 +378,48 @@ const AITextProcessor = (_a) => {
             .split('_')
             .join(' ');
         const currVarOpts = Array.isArray(variableOptions[variable]) ? variableOptions[variable] : [];
-        const currValueOptionElements = currVarOpts.map((varValue, j) => (react_1.default.createElement("option", { key: `var-${i}-opt-${j}`, value: varValue }, varValue)));
+        const currValueDropdownItemElements = currVarOpts.map((varValue, j) => (react_1.default.createElement(react_bootstrap_1.Dropdown.Item, { key: `var-${i}-dropdown-item-${j}`, onClick: () => handleSetVariableValue(variable, varValue) }, varValue)));
         const canAddVariableOption = !!currVarValue && !currVarOpts.includes(currVarValue);
         const canDeleteVariableOption = !!currVarValue;
-        return (react_1.default.createElement("div", { key: `variable-${i}`, className: "d-flex gap-1 mb-1" },
+        return (react_1.default.createElement("div", { key: `variable-${i}`, className: "d-flex flex-wrap gap-1 mb-1" },
             react_1.default.createElement(react_bootstrap_1.Form.Control, { size: "sm", type: "text", disabled: true, value: currVarName, style: { width: 150 } }),
-            react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", size: "sm", placeholder: "Value", value: currVarValue, onChange: (e) => handleSetVariableValue(variable, e.target.value), style: { width: 150 } }),
-            react_1.default.createElement(react_bootstrap_1.Form.Select, { size: "sm", value: currVarValue, onChange: (e) => handleSetVariableValue(variable, e.target.value), style: { width: 20 } },
-                react_1.default.createElement("option", { value: "" }),
-                currValueOptionElements),
+            react_1.default.createElement(react_bootstrap_1.Dropdown, { as: react_bootstrap_1.ButtonGroup },
+                react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", size: "sm", placeholder: "Value", value: currVarValue, onChange: (e) => handleSetVariableValue(variable, e.target.value), style: { width: 150, borderTopRightRadius: 0, borderBottomRightRadius: 0 } }),
+                react_1.default.createElement(react_bootstrap_1.Dropdown.Toggle, { split: true, variant: "secondary", id: `variable-dropdown-${currVarName}` }),
+                react_1.default.createElement(react_bootstrap_1.Dropdown.Menu, null, currValueDropdownItemElements)),
             react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", size: "sm", onClick: () => handleAddVariableOption(variable, currVarValue), disabled: !canAddVariableOption },
                 react_1.default.createElement(fa_1.FaPlus, { className: "mb-1" })),
-            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", size: "sm", onClick: () => handleDeleteVariableOption(variable, currVarValue), disabled: !canDeleteVariableOption },
-                react_1.default.createElement(fa_1.FaTrashAlt, { className: "mb-1" }))));
+            i !== variableDeletionConfirmationIndex && (react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", size: "sm", onClick: () => handleDeleteVariableOption(i), disabled: !canDeleteVariableOption },
+                react_1.default.createElement(fa_1.FaTrashAlt, { className: "mb-1" }))),
+            i === variableDeletionConfirmationIndex && (react_1.default.createElement("div", { className: "d-flex align-items-center gap-1" },
+                react_1.default.createElement(react_bootstrap_1.Button, { size: "sm", variant: "outline-danger", onClick: (e) => {
+                        handleConfirmDeleteVariableOption(variable, currVarValue);
+                    } },
+                    react_1.default.createElement(fa_1.FaCheck, { className: "mb-1" })),
+                react_1.default.createElement(react_bootstrap_1.Button, { size: "sm", variant: "outline-secondary", onClick: (e) => {
+                        handleCancelDeleteVariableOption();
+                    } },
+                    react_1.default.createElement(fa_1.FaTimes, { className: "mb-1" }))))));
     });
     const showProcessingAlert = processingRef.current && ((outputs !== null && outputs !== void 0 ? outputs : []).length < currentChunkIndex + 1 || retryingRef.current);
     const selectedPreset = (mergedPresets !== null && mergedPresets !== void 0 ? mergedPresets : {})[selectedPresetName];
-    const hasChanges = !selectedPreset ||
-        (selectedPreset && selectedPreset.name !== presetName) ||
-        selectedPreset.aiModel !== openAiModel ||
-        selectedPreset.systemPrompt !== systemPrompt ||
-        selectedPreset.userPrompt !== userPrompt ||
-        selectedPreset.averageTokenLength !== averageTokenLength ||
-        selectedPreset.requestMaxTokenRatio !== requestMaxTokenRatio ||
-        selectedPreset.chunkOverlapWordCount !== chunkOverlapWordCount ||
-        selectedPreset.chunkPrefix !== chunkPrefix ||
-        !!selectedPreset.autoShrink !== !!autoShrinkEnabled ||
-        JSON.stringify(selectedPreset.variableValues) !== JSON.stringify(variableValues !== null && variableValues !== void 0 ? variableValues : {}) ||
-        JSON.stringify(selectedPreset.variableOptions) !== JSON.stringify(variableOptions !== null && variableOptions !== void 0 ? variableOptions : {});
-    const canSave = !!presetName.trim() && hasChanges;
+    /** Has changes the user will be interested in saving. */
+    const hasMeaningfulChanges = !selectedPreset ||
+        (selectedPreset && (selectedPreset === null || selectedPreset === void 0 ? void 0 : selectedPreset.name) !== presetName) ||
+        (selectedPreset === null || selectedPreset === void 0 ? void 0 : selectedPreset.aiModel) !== openAiModel ||
+        (selectedPreset === null || selectedPreset === void 0 ? void 0 : selectedPreset.systemPrompt) !== systemPrompt ||
+        (selectedPreset === null || selectedPreset === void 0 ? void 0 : selectedPreset.userPrompt) !== userPrompt ||
+        (selectedPreset === null || selectedPreset === void 0 ? void 0 : selectedPreset.averageTokenLength) !== averageTokenLength ||
+        (selectedPreset === null || selectedPreset === void 0 ? void 0 : selectedPreset.requestMaxTokenRatio) !== requestMaxTokenRatio ||
+        (selectedPreset === null || selectedPreset === void 0 ? void 0 : selectedPreset.chunkOverlapWordCount) !== chunkOverlapWordCount ||
+        (selectedPreset === null || selectedPreset === void 0 ? void 0 : selectedPreset.chunkPrefix) !== chunkPrefix ||
+        !!(selectedPreset === null || selectedPreset === void 0 ? void 0 : selectedPreset.autoShrink) !== !!autoShrinkEnabled ||
+        JSON.stringify((_d = selectedPreset === null || selectedPreset === void 0 ? void 0 : selectedPreset.variableOptions) !== null && _d !== void 0 ? _d : {}) !== JSON.stringify(variableOptions !== null && variableOptions !== void 0 ? variableOptions : {});
+    /** Has changes the user might not necessarily be interested in saving. */
+    const hasSuperfluousChanges = JSON.stringify((_e = selectedPreset === null || selectedPreset === void 0 ? void 0 : selectedPreset.variableValues) !== null && _e !== void 0 ? _e : {}) !== JSON.stringify(variableValues !== null && variableValues !== void 0 ? variableValues : {});
+    const showUnsavedNotification = !!presetName.trim() && hasMeaningfulChanges;
+    const canSave = !!presetName.trim() && (hasMeaningfulChanges || hasSuperfluousChanges);
+    const canReset = !!selectedPreset && canSave;
     const configured = !!openAiModel && !!userPrompt;
     const canExecute = configured && !!input;
     const hasInput = (input !== null && input !== void 0 ? input : '').length > 0;
@@ -389,18 +439,60 @@ const AITextProcessor = (_a) => {
                             react_1.default.createElement("option", { value: "" }, "\u2728 New Preset"),
                             presetOptionElements),
                         react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted" }, "Select a preset, or choose New Preset to create a new one. Note that default presets cannot be deleted.")),
+                    presetDescription && (react_1.default.createElement(react_bootstrap_1.Alert, { variant: "info", className: "mb-0 py-1" },
+                        react_1.default.createElement("div", { className: "d-flex gap-2" },
+                            react_1.default.createElement(fa_1.FaInfoCircle, { className: "mt-1" }),
+                            " ",
+                            presetDescription))),
                     react_1.default.createElement(react_bootstrap_1.Accordion, { key: `accordion-${!selectedPresetName ? 'new' : 'saved'}`, defaultActiveKey: !selectedPresetName ? '1' : undefined },
                         react_1.default.createElement(react_bootstrap_1.Accordion.Item, { eventKey: "1" },
                             react_1.default.createElement(react_bootstrap_1.Accordion.Header, null,
-                                react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
-                                    !configured ? react_1.default.createElement(fa_1.FaWrench, null) : react_1.default.createElement(fa_1.FaCheckSquare, { className: "text-success" }),
-                                    " Preset Configuration",
-                                    canSave && react_1.default.createElement(react_bootstrap_1.Badge, { bg: "primary" }, "Unsaved"))),
+                                react_1.default.createElement("div", { className: "d-flex flex-wrap justify-content-between gap-2 w-100 me-4" },
+                                    react_1.default.createElement("div", { className: "d-flex flex-wrap align-items-center gap-2" },
+                                        !configured ? react_1.default.createElement(fa_1.FaWrench, null) : react_1.default.createElement(fa_1.FaCheckSquare, { className: "text-success" }),
+                                        " Preset Configuration",
+                                        showUnsavedNotification && react_1.default.createElement(react_bootstrap_1.Badge, { bg: "primary" }, "Unsaved")),
+                                    react_1.default.createElement("div", { className: "d-flex justify-content-end gap-2", onClick: (e) => e.stopPropagation() },
+                                        react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", size: "sm", onClick: (e) => {
+                                                handleSavePreset();
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }, disabled: !canSave },
+                                            react_1.default.createElement(fa_1.FaSave, { className: "mb-1" })),
+                                        react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-secondary", size: "sm", onClick: (e) => {
+                                                handleResetPreset();
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }, disabled: !canReset },
+                                            react_1.default.createElement(fa_1.FaUndo, { className: "mb-1" })),
+                                        !showDeletePresetConfirmation && (react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", size: "sm", onClick: (e) => {
+                                                handleDeletePreset();
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            } },
+                                            react_1.default.createElement(fa_1.FaTrashAlt, { className: "mb-1" }))),
+                                        showDeletePresetConfirmation && (react_1.default.createElement("div", { className: "d-flex align-items-center gap-1" },
+                                            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", size: "sm", onClick: (e) => {
+                                                    handleConfirmDeletePreset();
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                } },
+                                                react_1.default.createElement(fa_1.FaCheck, { className: "mb-1" })),
+                                            react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-secondary", size: "sm", onClick: (e) => {
+                                                    handleCancelDeletePreset();
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                } },
+                                                react_1.default.createElement(fa_1.FaTimes, { className: "mb-1" }))))))),
                             react_1.default.createElement(react_bootstrap_1.Accordion.Body, { className: "d-flex flex-column gap-2" },
                                 react_1.default.createElement(react_bootstrap_1.Form.Group, { controlId: "name-group" },
                                     react_1.default.createElement(react_bootstrap_1.Form.Label, { className: "small fw-bold mb-1" }, "Name"),
                                     react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", placeholder: "Enter a preset name", value: presetName, onChange: (e) => setPresetName(e.target.value) }),
                                     react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted" }, "Provide a name for this preset.")),
+                                react_1.default.createElement(react_bootstrap_1.Form.Group, { controlId: "name-group" },
+                                    react_1.default.createElement(react_bootstrap_1.Form.Label, { className: "small fw-bold mb-1" }, "Description"),
+                                    react_1.default.createElement(react_bootstrap_1.Form.Control, { type: "text", placeholder: "Enter a description", value: presetDescription, onChange: (e) => setPresetDescription(e.target.value) }),
+                                    react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted" }, "Provide an optional description for this preset.")),
                                 react_1.default.createElement(react_bootstrap_1.Form.Group, { controlId: "model-group" },
                                     react_1.default.createElement(react_bootstrap_1.Form.Label, { className: "small fw-bold mb-1" }, "AI Model"),
                                     react_1.default.createElement(react_bootstrap_1.Form.Select, { value: openAiModel, onChange: (e) => setOpenAiModel(e.target.value) },
@@ -417,7 +509,7 @@ const AITextProcessor = (_a) => {
                                             react_1.default.createElement(react_bootstrap_1.Badge, { pill: true, bg: "secondary" }, TextUtils_1.TextUtils.getEstimatedTokenCount(systemPrompt, averageTokenLength !== null && averageTokenLength !== void 0 ? averageTokenLength : 0))))),
                                 react_1.default.createElement(react_bootstrap_1.Form.Group, { controlId: "user-prompt-group" },
                                     react_1.default.createElement(react_bootstrap_1.Form.Label, { className: "small fw-bold mb-1" }, "User Prompt"),
-                                    react_1.default.createElement(react_bootstrap_1.Form.Control, { as: "textarea", placeholder: "Enter the user prompt", rows: 3, value: userPrompt, onChange: (e) => setUserPrompt(e.target.value) }),
+                                    react_1.default.createElement(react_bootstrap_1.Form.Control, { as: "textarea", placeholder: "Enter the user prompt", rows: 3, value: userPrompt, onChange: (e) => handleSetUserPrompt(e.target.value) }),
                                     react_1.default.createElement("div", { className: "d-flex justify-content-between gap-2" },
                                         react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted" },
                                             "Provide the prompt used to process the text. The input text will be appended to the end of this prompt. You can optionally include variables in double curly braces, like so: ",
@@ -448,14 +540,14 @@ const AITextProcessor = (_a) => {
                                                     " (",
                                                     `${Math.round(requestMaxTokenRatio * 100)}%`,
                                                     "), and the max tokens for the model is",
-                                                    ' ', (_d = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _d !== void 0 ? _d : 4000,
+                                                    ' ', (_f = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _f !== void 0 ? _f : 4000,
                                                     ", each request (chunk) will have",
                                                     ' ',
-                                                    Math.ceil(((_e = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _e !== void 0 ? _e : 4000) * requestMaxTokenRatio),
+                                                    Math.ceil(((_g = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _g !== void 0 ? _g : 4000) * requestMaxTokenRatio),
                                                     " tokens max. This would leave about",
                                                     ' ',
-                                                    ((_f = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _f !== void 0 ? _f : 4000) -
-                                                        Math.ceil(((_g = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _g !== void 0 ? _g : 4000) * requestMaxTokenRatio),
+                                                    ((_h = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _h !== void 0 ? _h : 4000) -
+                                                        Math.ceil(((_j = currentOpenAiModelInfo === null || currentOpenAiModelInfo === void 0 ? void 0 : currentOpenAiModelInfo.maxTokens) !== null && _j !== void 0 ? _j : 4000) * requestMaxTokenRatio),
                                                     ' ',
                                                     "tokens for a meaningful response, per request. For each chunk, we want to make sure there is still a decent amount of tokens left for the response.")),
                                             react_1.default.createElement(react_bootstrap_1.Form.Group, { controlId: "form-group-chunkOverlapWordCount" },
@@ -472,8 +564,21 @@ const AITextProcessor = (_a) => {
                                 react_1.default.createElement("div", { className: "d-flex justify-content-end gap-2" },
                                     react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", onClick: handleSavePreset, disabled: !canSave },
                                         react_1.default.createElement(fa_1.FaSave, { className: "mb-1" })),
-                                    react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", onClick: handleDeletePreset },
-                                        react_1.default.createElement(fa_1.FaTrashAlt, { className: "mb-1" })))))),
+                                    react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-secondary", onClick: handleResetPreset, disabled: !canReset },
+                                        react_1.default.createElement(fa_1.FaUndo, { className: "mb-1" })),
+                                    !showDeletePresetConfirmation && (react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", onClick: (e) => {
+                                            handleDeletePreset();
+                                        } },
+                                        react_1.default.createElement(fa_1.FaTrashAlt, { className: "mb-1" }))),
+                                    showDeletePresetConfirmation && (react_1.default.createElement("div", { className: "d-flex align-items-center gap-1" },
+                                        react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", onClick: (e) => {
+                                                handleConfirmDeletePreset();
+                                            } },
+                                            react_1.default.createElement(fa_1.FaCheck, { className: "mb-1" })),
+                                        react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-secondary", onClick: (e) => {
+                                                handleCancelDeletePreset();
+                                            } },
+                                            react_1.default.createElement(fa_1.FaTimes, { className: "mb-1" })))))))),
                     variableElements.length > 0 && (react_1.default.createElement(react_bootstrap_1.Form.Group, { controlId: "variables-group" },
                         react_1.default.createElement(react_bootstrap_1.Form.Label, { className: "small fw-bold mb-1" }, "Variables:"),
                         variableElements)),
@@ -482,8 +587,8 @@ const AITextProcessor = (_a) => {
                         react_1.default.createElement(react_bootstrap_1.Form.Control, { ref: inputTextFieldRef, as: "textarea", placeholder: "Enter text to process", rows: 8, value: input, onChange: (e) => {
                                 handleSetInput(e.target.value);
                             }, onFocus: handleInputTextFieldFocus })),
-                    react_1.default.createElement("div", { className: "d-flex justify-content-between align-items-start gap-2" },
-                        react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
+                    react_1.default.createElement("div", { className: "d-flex flex-wrap justify-content-between align-items-start gap-2" },
+                        react_1.default.createElement("div", { className: "d-flex flex-wrap align-items-center gap-2" },
                             react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", size: "sm", onClick: handlePaste }, "Paste"),
                             react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", size: "sm", onClick: handleClearInput, disabled: !hasInput }, "Clear"),
                             react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-secondary", size: "sm", onClick: handleShrink, disabled: !hasInput },
@@ -516,8 +621,8 @@ const AITextProcessor = (_a) => {
                         processingRef.current && (react_1.default.createElement(react_bootstrap_1.Button, { size: "lg", variant: "danger", onClick: handleStop }, "Stop")))))),
         (xhr || processingRef.current || errorsRef.current.length > 0 || (outputs !== null && outputs !== void 0 ? outputs : []).length > 0) && (react_1.default.createElement("div", { className: "d-flex flex-column gap-1" },
             react_1.default.createElement(react_bootstrap_1.Card, null,
-                react_1.default.createElement(react_bootstrap_1.Card.Header, { className: "d-flex justify-content-between align-items-center gap-2" },
-                    react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
+                react_1.default.createElement(react_bootstrap_1.Card.Header, { className: "d-flex flex-wrap justify-content-between align-items-center gap-2" },
+                    react_1.default.createElement("div", { className: "d-flex flex-wrap align-items-center gap-2" },
                         processingRef.current && (react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
                             react_1.default.createElement(react_bootstrap_1.Spinner, { animation: "border", role: "status", size: "sm" }))),
                         "Output",
@@ -531,9 +636,14 @@ const AITextProcessor = (_a) => {
                         currentChunkIndex >= 0 && (react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", size: "sm", onClick: handleRetryChunk, disabled: retryingRef.current }, "Retry Chunk"))),
                     react_1.default.createElement("div", { className: "d-flex align-items-center gap-2" },
                         react_1.default.createElement(react_bootstrap_1.Form.Check, { inline: true, label: "Raw", className: "user-select-none", id: "raw-checkbox", checked: showRawOutput, onChange: (e) => setShowRawOutput(e.target.checked) }),
-                        react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-primary", onClick: handleCopy }, copied ? react_1.default.createElement(fa_1.FaCheck, { className: "mb-1" }) : react_1.default.createElement(fa_1.FaCopy, { className: "mb-1" })),
-                        react_1.default.createElement(react_bootstrap_1.Button, { variant: "outline-danger", onClick: handleClear },
-                            react_1.default.createElement(fa_1.FaTrash, { className: "mb-1" })))),
+                        react_1.default.createElement(react_bootstrap_1.Button, { size: "sm", variant: "outline-primary", onClick: handleCopy }, copied ? react_1.default.createElement(fa_1.FaCheck, { className: "mb-1" }) : react_1.default.createElement(fa_1.FaCopy, { className: "mb-1" })),
+                        !showDeleteOutputConfirmation && (react_1.default.createElement(react_bootstrap_1.Button, { size: "sm", variant: "outline-danger", onClick: handleDeleteOutput },
+                            react_1.default.createElement(fa_1.FaTrash, { className: "mb-1" }))),
+                        showDeleteOutputConfirmation && (react_1.default.createElement("div", { className: "d-flex align-items-center gap-1" },
+                            react_1.default.createElement(react_bootstrap_1.Button, { size: "sm", variant: "outline-danger", onClick: handleConfirmDeleteOutput },
+                                react_1.default.createElement(fa_1.FaCheck, { className: "mb-1" })),
+                            react_1.default.createElement(react_bootstrap_1.Button, { size: "sm", variant: "outline-secondary", onClick: handleCancelDeleteOutput },
+                                react_1.default.createElement(fa_1.FaTimes, { className: "mb-1" })))))),
                 react_1.default.createElement(react_bootstrap_1.Card.Body, { className: "d-flex flex-column gap-2" },
                     !outputs && react_1.default.createElement(react_bootstrap_1.Spinner, { animation: "border", role: "status", size: "sm" }),
                     outputs && showRawOutput && react_1.default.createElement("pre", null, outputs.join('\n\n')),
@@ -549,7 +659,7 @@ const AITextProcessor = (_a) => {
                     react_1.default.createElement(react_bootstrap_1.Form.Text, { className: "text-muted my-0" }, "Tokens:"),
                     react_1.default.createElement(react_bootstrap_1.Badge, { pill: true, bg: "secondary" }, TextUtils_1.TextUtils.getEstimatedTokenCount((outputs !== null && outputs !== void 0 ? outputs : []).join(' '), averageTokenLength !== null && averageTokenLength !== void 0 ? averageTokenLength : 0)))))),
         errorAlertElements,
-        ((_h = (outputs !== null && outputs !== void 0 ? outputs : [])) === null || _h === void 0 ? void 0 : _h.length) > 0 && (react_1.default.createElement("h5", { className: "text-center text-muted" },
+        ((_k = (outputs !== null && outputs !== void 0 ? outputs : [])) === null || _k === void 0 ? void 0 : _k.length) > 0 && (react_1.default.createElement("h5", { className: "text-center text-muted" },
             "If this project helped you, please",
             ' ',
             react_1.default.createElement("a", { href: "https://github.com/justinmahar/ai-text-processor/" }, "Star it on GitHub"),
