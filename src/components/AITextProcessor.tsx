@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import copy from 'copy-to-clipboard';
 import { ClientStreamChatCompletionConfig, OpenAIExt } from 'openai-ext';
 import React from 'react';
-import { Accordion, Alert, Badge, Button, Card, Form, Spinner } from 'react-bootstrap';
+import { Accordion, Alert, Badge, Button, ButtonGroup, Card, Dropdown, Form, Spinner } from 'react-bootstrap';
 import { DivProps } from 'react-html-props';
 import {
   FaAlignLeft,
@@ -404,28 +404,28 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
         {varValue}
       </option>
     ));
+    const currValueDropdownItemElements = currVarOpts.map((varValue: any, j: number) => (
+      <Dropdown.Item key={`var-${i}-dropdown-item-${j}`} onClick={() => handleSetVariableValue(variable, varValue)}>
+        {varValue}
+      </Dropdown.Item>
+    ));
     const canAddVariableOption = !!currVarValue && !currVarOpts.includes(currVarValue);
     const canDeleteVariableOption = !!currVarValue;
     return (
       <div key={`variable-${i}`} className="d-flex gap-1 mb-1">
         <Form.Control size="sm" type="text" disabled value={currVarName} style={{ width: 150 }} />
-        <Form.Control
-          type="text"
-          size="sm"
-          placeholder="Value"
-          value={currVarValue}
-          onChange={(e) => handleSetVariableValue(variable, e.target.value)}
-          style={{ width: 150 }}
-        />
-        <Form.Select
-          size="sm"
-          value={currVarValue}
-          onChange={(e) => handleSetVariableValue(variable, e.target.value)}
-          style={{ width: 20 }}
-        >
-          {(canAddVariableOption || !currVarValue) && <option value={currVarValue}>{currVarValue || '(empty)'}</option>}
-          {currValueOptionElements}
-        </Form.Select>
+        <Dropdown as={ButtonGroup}>
+          <Form.Control
+            type="text"
+            size="sm"
+            placeholder="Value"
+            value={currVarValue}
+            onChange={(e) => handleSetVariableValue(variable, e.target.value)}
+            style={{ width: 150, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+          />
+          <Dropdown.Toggle split variant="secondary" id={`variable-dropdown-${currVarName}`} />
+          <Dropdown.Menu>{currValueDropdownItemElements}</Dropdown.Menu>
+        </Dropdown>
         <Button
           variant="outline-primary"
           size="sm"

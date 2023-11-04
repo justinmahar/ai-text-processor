@@ -32,9 +32,9 @@ export const defaultPresets: Preset[] = [
       '{{Formatted_As}}': 'bullet points',
     },
     variableOptions: {
-      '{{Data_To_Extract}}': ['the key ideas', 'the main points', 'the strategies'],
+      '{{Data_To_Extract}}': ['the facts', 'the ideas', 'the main points', 'the sentiment', 'the topics'],
       '{{Document_Type}}': ['text', 'video transcript'],
-      '{{Formatted_As}}': ['a numbered list', 'a markdown table', 'bullet points'],
+      '{{Formatted_As}}': ['a markdown table', 'a numbered list', 'a percentage', 'bullet points'],
     },
   },
   {
@@ -49,7 +49,7 @@ export const defaultPresets: Preset[] = [
     chunkPrefix: '(continued...) ',
     autoShrink: false,
     variableValues: { '{{Length_of_Summary}}': '1 paragraph' },
-    variableOptions: { '{{Length_of_Summary}}': ['1 sentence', '1 paragraph', '2 paragraphs', '3 paragraphs'] },
+    variableOptions: { '{{Length_of_Summary}}': ['1 paragraph', '2 paragraphs', '3 paragraphs', '1 sentence'] },
   },
   {
     name: '📖 Translate Text',
