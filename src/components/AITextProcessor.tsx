@@ -15,6 +15,7 @@ import {
   FaSave,
   FaTrash,
   FaTrashAlt,
+  FaUndo,
   FaWrench,
 } from 'react-icons/fa';
 import { useMomentaryBool } from 'react-use-precision-timer';
@@ -276,6 +277,10 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     handleSelectPreset('');
   };
 
+  const handleResetPreset = () => {
+    handleSelectPreset(selectedPresetName);
+  };
+
   const handleCopy = () => {
     copy((outputs ?? []).join('\n\n'));
     toggleCopied();
@@ -463,6 +468,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     JSON.stringify(selectedPreset?.variableValues ?? {}) !== JSON.stringify(variableValues ?? {});
   const showUnsavedNotification = !!presetName.trim() && hasMeaningfulChanges;
   const canSave = !!presetName.trim() && (hasMeaningfulChanges || hasSuperfluousChanges);
+  const canReset = !!selectedPreset && canSave;
   const configured = !!openAiModel && !!userPrompt;
   const canExecute = configured && !!input;
   const hasInput = (input ?? '').length > 0;
@@ -521,6 +527,18 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                         disabled={!canSave}
                       >
                         <FaSave className="mb-1" />
+                      </Button>
+                      <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={(e) => {
+                          handleResetPreset();
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        disabled={!canReset}
+                      >
+                        <FaUndo className="mb-1" />
                       </Button>
                       <Button
                         variant="outline-danger"
@@ -693,6 +711,9 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                   <div className="d-flex justify-content-end gap-2">
                     <Button variant="outline-primary" onClick={handleSavePreset} disabled={!canSave}>
                       <FaSave className="mb-1" />
+                    </Button>
+                    <Button variant="outline-secondary" onClick={handleResetPreset} disabled={!canReset}>
+                      <FaUndo className="mb-1" />
                     </Button>
                     <Button variant="outline-danger" onClick={handleDeletePreset}>
                       <FaTrashAlt className="mb-1" />
