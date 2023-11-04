@@ -61,7 +61,7 @@ export const defaultPresets: Preset[] = [
     requestMaxTokenRatio: 0.4,
     chunkOverlapWordCount: 0,
     chunkPrefix: '',
-    autoShrink: true,
+    autoShrink: false,
     variableValues: {
       '{{Start_Language}}': 'English',
       '{{End_Language}}': 'German',
@@ -136,7 +136,7 @@ export const defaultPresets: Preset[] = [
     requestMaxTokenRatio: 0.4,
     chunkOverlapWordCount: 0,
     chunkPrefix: '',
-    autoShrink: true,
+    autoShrink: false,
     variableValues: { '{{Document_Type}}': 'text' },
     variableOptions: {
       '{{Document_Type}}': ['text', 'video transcript'],
