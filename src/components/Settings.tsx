@@ -18,6 +18,8 @@ export const Settings = ({ ...props }: SettingsProps) => {
   const [newOpenAiModelName, setNewOpenAiModelName] = React.useState('');
   const [newOpenAiModelId, setNewOpenAiModelId] = React.useState('');
   const [newOpenAiModelMaxTokens, setNewOpenAiModelMaxTokens] = React.useState('');
+  const [newOpenAiModelCostPer1kInput, setNewOpenAiModelCostPer1kInput] = React.useState('0');
+  const [newOpenAiModelCostPer1kOutput, setNewOpenAiModelCostPer1kOutput] = React.useState('0');
   const [showChunkInspector, setShowChunkInspector] = localSettings[LocalSettingsKeys.showChunkInspector];
   const [showImportExportModal, setShowImportExportModal] = React.useState(false);
 
@@ -38,6 +40,8 @@ export const Settings = ({ ...props }: SettingsProps) => {
       name: newOpenAiModelName,
       id: newOpenAiModelId,
       maxTokens: parseInt(newOpenAiModelMaxTokens),
+      costPer1kInput: parseFloat(newOpenAiModelCostPer1kInput),
+      costPer1kOutput: parseFloat(newOpenAiModelCostPer1kOutput),
     });
     setCustomOpenAiModelInfos(newCustomOpenAiModels);
     setNewOpenAiModelName('');
@@ -74,6 +78,26 @@ export const Settings = ({ ...props }: SettingsProps) => {
             step={1}
             placeholder="Max Tokens"
             value={model.maxTokens}
+            disabled={true}
+            style={{ maxWidth: 150 }}
+            className="w-100"
+          />
+          <Form.Control
+            type="number"
+            min={0}
+            step={1}
+            placeholder="Cost In (1K)"
+            value={model.costPer1kInput}
+            disabled={true}
+            style={{ maxWidth: 150 }}
+            className="w-100"
+          />
+          <Form.Control
+            type="number"
+            min={0}
+            step={1}
+            placeholder="Cost Out (1K)"
+            value={model.costPer1kOutput}
             disabled={true}
             style={{ maxWidth: 150 }}
             className="w-100"
@@ -161,14 +185,34 @@ export const Settings = ({ ...props }: SettingsProps) => {
                         style={{ maxWidth: 150 }}
                         className="w-100"
                       />
+                      <Form.Control
+                        type="number"
+                        min={0}
+                        step={0.001}
+                        placeholder="Cost In (1K)"
+                        value={newOpenAiModelCostPer1kInput}
+                        onChange={(e) => setNewOpenAiModelCostPer1kInput(e.target.value)}
+                        style={{ maxWidth: 150 }}
+                        className="w-100"
+                      />
+                      <Form.Control
+                        type="number"
+                        min={0}
+                        step={0.001}
+                        placeholder="Cost Out (1K)"
+                        value={newOpenAiModelCostPer1kOutput}
+                        onChange={(e) => setNewOpenAiModelCostPer1kOutput(e.target.value)}
+                        style={{ maxWidth: 150 }}
+                        className="w-100"
+                      />
                       <Button variant="outline-primary" onClick={handleAddNewOpenAiModel} disabled={!canAddOpenAiModel}>
                         <FaPlus />
                       </Button>
                     </div>
                   </div>
                   <Form.Text className="text-muted">
-                    Supports all OpenAI chat models (legacy not supported). Enter a display name, model ID, and the max
-                    number of tokens for the model.
+                    Supports all OpenAI chat models (legacy not supported). Enter a display name, model ID, the max
+                    number of tokens for the model, and the $ cost for input/output per 1K tokens.
                   </Form.Text>
                 </Card.Body>
               </Card>

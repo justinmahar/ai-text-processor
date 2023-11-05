@@ -360,20 +360,63 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     );
   });
 
+  const dollarPrecision = 10000;
+
+  const totalInputCost =
+    Math.round(
+      (chunks
+        .map((chunk) => systemPrompt + ' ' + preparedUserPrompt + '\n\n' + chunk)
+        .map((payload) => TextUtils.getEstimatedTokenCount(payload, averageTokenLength ?? 0))
+        .reduce((p, c) => p + c, 0) /
+        1000) *
+        (currentOpenAiModelInfo?.costPer1kInput ?? 0) *
+        dollarPrecision,
+    ) / dollarPrecision;
+
+  const totalOutputCost =
+    Math.round(
+      ((outputs ?? [])
+        .map((output) => TextUtils.getEstimatedTokenCount(output, averageTokenLength ?? 0))
+        .reduce((p, c) => p + c, 0) /
+        1000) *
+        (currentOpenAiModelInfo?.costPer1kOutput ?? 0) *
+        dollarPrecision,
+    ) / dollarPrecision;
+
+  const totalCost = Math.round((totalInputCost + totalOutputCost) * dollarPrecision) / dollarPrecision;
+
   const chunkElements = chunks.map((chunk, i) => {
+    const tokenCount = TextUtils.getEstimatedTokenCount(
+      systemPrompt + ' ' + preparedUserPrompt + '\n\n' + chunk,
+      averageTokenLength ?? 0,
+    );
     return (
       <Alert key={`chunk-${i}`} variant="secondary">
         <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
           <h6 className="mb-0">
             <Badge bg="secondary">Chunk #{i + 1}</Badge>
           </h6>
-          <div className="d-flex align-items-center gap-2 fw-bold">
-            <div>Tokens:</div>
-            <div>
-              <Badge pill bg="secondary">
-                {TextUtils.getEstimatedTokenCount(systemPrompt + preparedUserPrompt + chunk, averageTokenLength ?? 0)}
-              </Badge>
+          <div className="d-flex align-items-center gap-2">
+            <div className="d-flex align-items-center gap-2 fw-bold">
+              <div>Tokens:</div>
+              <div>
+                <Badge pill bg="secondary">
+                  {tokenCount}
+                </Badge>
+              </div>
             </div>
+            {currentOpenAiModelInfo && (
+              <div className="d-flex align-items-center gap-2 fw-bold">
+                <div>Est Cost:</div>
+                <div>
+                  <Badge pill bg="secondary">
+                    $
+                    {Math.round(((tokenCount / 1000) * currentOpenAiModelInfo?.costPer1kInput ?? 0) * dollarPrecision) /
+                      dollarPrecision}
+                  </Badge>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <hr />
@@ -873,7 +916,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                   onChange={(e) => setAutoShrinkEnabled(e.target.checked)}
                 />
               </div>
-              <div className="d-flex align-items-center gap-2">
+              <div className="d-flex flex-wrap align-items-center gap-2">
                 <div className="d-flex align-items-center gap-1 small">
                   <Form.Text className="text-muted my-0">Chunks:</Form.Text>
                   <Badge pill bg="secondary">
@@ -884,6 +927,12 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                   <Form.Text className="text-muted my-0">Tokens:</Form.Text>
                   <Badge pill bg="secondary">
                     {TextUtils.getEstimatedTokenCount(input, averageTokenLength ?? 0)}
+                  </Badge>
+                </div>
+                <div className="d-flex align-items-center gap-1 small">
+                  <Form.Text className="text-muted my-0">Est Cost:</Form.Text>
+                  <Badge pill bg="secondary">
+                    ${totalInputCost}
                   </Badge>
                 </div>
               </div>
@@ -992,11 +1041,23 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
               )}
             </Card.Body>
           </Card>
-          <div className="d-flex justify-content-end">
+          <div className="d-flex flex-wrap justify-content-end gap-2">
             <div className="d-flex align-items-center gap-1 small">
               <Form.Text className="text-muted my-0">Tokens:</Form.Text>
               <Badge pill bg="secondary">
                 {TextUtils.getEstimatedTokenCount((outputs ?? []).join(' '), averageTokenLength ?? 0)}
+              </Badge>
+            </div>
+            <div className="d-flex align-items-center gap-1 small">
+              <Form.Text className="text-muted my-0">Output Cost:</Form.Text>
+              <Badge pill bg="secondary">
+                ${totalOutputCost}
+              </Badge>
+            </div>
+            <div className="d-flex align-items-center gap-1 small">
+              <Form.Text className="text-muted my-0">Total Cost:</Form.Text>
+              <Badge pill bg="success">
+                ${totalCost}
               </Badge>
             </div>
           </div>
