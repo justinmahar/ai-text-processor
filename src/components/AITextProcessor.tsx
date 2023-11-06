@@ -428,9 +428,10 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   });
 
   const outputElements = (outputs ?? []).map((output, i, arr) => {
+    const isLastOutput = i === arr.length - 1;
     return (
       <Alert key={`output-${i}`} variant="light" className="text-black mb-0">
-        <Markdown>{output && processingRef.current ? `${output}│` : `${output}`}</Markdown>
+        <Markdown>{output && processingRef.current && isLastOutput ? `${output}│` : `${output}`}</Markdown>
       </Alert>
     );
   });
