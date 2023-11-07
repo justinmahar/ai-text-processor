@@ -21,7 +21,7 @@ import {
 } from 'react-icons/fa';
 import { useMomentaryBool } from 'react-use-precision-timer';
 import { Markdown } from './Markdown';
-import { Preset, defaultPresetsMap, toSortedPresetsMap } from './Preset';
+import { Preset, defaultAiModelOption as defaultAiModelValue, defaultPresetsMap, toSortedPresetsMap } from './Preset';
 import { TextUtils } from './TextUtils';
 import { AIModelInfo, defaultOpenAiModelInfos } from './AIModelInfo';
 import { LocalSettingsDefaults, LocalSettingsKeys, useLocalSettings } from './useLocalSettings';
@@ -37,6 +37,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const [presetName, setPresetName] = localSettings[LocalSettingsKeys.presetName];
   const [presetDescription, setPresetDescription] = localSettings[LocalSettingsKeys.presetDescription];
   const [openAiModel, setOpenAiModel] = localSettings[LocalSettingsKeys.openAiModel];
+  const useDefaultAiModel = openAiModel === defaultAiModelValue;
   const [systemPrompt, setSystemPrompt] = localSettings[LocalSettingsKeys.systemPrompt];
   const [userPrompt, setUserPrompt] = localSettings[LocalSettingsKeys.userPrompt];
   const variables = [...new Set(`${systemPrompt}\n${userPrompt}`.match(/\{\{([\w_-]+)\}\}/g) ?? [])];
@@ -45,8 +46,10 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const [input, setInput] = localSettings[LocalSettingsKeys.input];
   const [outputs, setOutputs] = localSettings[LocalSettingsKeys.outputs];
   const [openAiKey] = localSettings[LocalSettingsKeys.openAiKey];
-  const [customOpenAiModels] = localSettings[LocalSettingsKeys.customOpenAiModelInfos];
-  const mergedOpenAiModels: AIModelInfo[] = [...defaultOpenAiModelInfos, ...(customOpenAiModels ?? [])];
+  const [customOpenAiModelInfos] = localSettings[LocalSettingsKeys.customOpenAiModelInfos];
+  const mergedOpenAiModelInfos: AIModelInfo[] = [...defaultOpenAiModelInfos, ...(customOpenAiModelInfos ?? [])];
+  const [defaultOpenAiModel] = localSettings[LocalSettingsKeys.defaultOpenAiModel];
+  const aiModelToUse = useDefaultAiModel ? defaultOpenAiModel : openAiModel;
   const [showRawOutput, setShowRawOutput] = localSettings[LocalSettingsKeys.showRawOutput];
   const [copied, toggleCopied] = useMomentaryBool(false, 2000);
   const [xhr, setXhr] = React.useState<XMLHttpRequest | undefined>(undefined);
@@ -59,7 +62,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const [chunkPrefix, setChunkPrefix] = localSettings[LocalSettingsKeys.chunkPrefix];
   const [showChunkInspector] = localSettings[LocalSettingsKeys.showChunkInspector];
   const [autoShrinkEnabled, setAutoShrinkEnabled] = localSettings[LocalSettingsKeys.autoShrinkEnabled];
-  const currentOpenAiModelInfo = mergedOpenAiModels.find((m) => m.id === openAiModel);
+  const currentOpenAiModelInfo = mergedOpenAiModelInfos.find((m) => m.id === aiModelToUse);
   const [currentChunkIndex, setCurrentChunkIndex] = React.useState(-1);
   const processingRef = React.useRef(false);
   const outputsRef = React.useRef<string[]>([]);
@@ -132,7 +135,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       // Make the call and store a reference to the XMLHttpRequest
       const xhr = OpenAIExt.streamClientChatCompletion(
         {
-          model: `${openAiModel}`,
+          model: `${aiModelToUse}`,
           messages,
         },
         streamConfig,
@@ -327,7 +330,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     inputTextFieldRef.current?.select();
   };
 
-  const openAiModelOptions = mergedOpenAiModels.map((model, i) => {
+  const openAiModelOptionElements = mergedOpenAiModelInfos.map((model, i) => {
     return (
       <option key={`open-ai-model-${i}`} value={model.id}>
         {model.name}
@@ -353,9 +356,12 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const presetKeys = Object.keys(mergedPresets ?? {});
   const presetOptionElements: JSX.Element[] = presetKeys.map((presetKey) => {
     const preset = (mergedPresets ?? {})[presetKey];
+    const presetUsingDefaultAiModel = preset.aiModel === defaultAiModelValue;
     return (
       <option key={`${presetKey}`} value={presetKey}>
-        {presetKey} ({mergedOpenAiModels.find((m) => m.id === preset.aiModel)?.name ?? preset.aiModel})
+        {presetKey}{' '}
+        {!presetUsingDefaultAiModel &&
+          `(${mergedOpenAiModelInfos.find((m) => m.id === preset.aiModel)?.name ?? preset.aiModel})`}
       </option>
     );
   });
@@ -707,7 +713,11 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                     <Form.Label className="small fw-bold mb-1">AI Model</Form.Label>
                     <Form.Select value={openAiModel} onChange={(e) => setOpenAiModel(e.target.value)}>
                       <option value="">AI Model...</option>
-                      {openAiModelOptions}
+                      <option value={defaultAiModelValue}>
+                        Default (
+                        {mergedOpenAiModelInfos.find((m) => m.id === defaultOpenAiModel)?.name ?? defaultOpenAiModel})
+                      </option>
+                      {openAiModelOptionElements}
                     </Form.Select>
                     <Form.Text className="text-muted">Select the AI model to use.</Form.Text>
                   </Form.Group>

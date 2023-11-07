@@ -4,7 +4,7 @@ import React from 'react';
 import { Alert, Button, Card, Form } from 'react-bootstrap';
 import { DivProps } from 'react-html-props';
 import { FaEye, FaEyeSlash, FaPlus, FaTrashAlt } from 'react-icons/fa';
-import { LocalSettingsKeys, useLocalSettings } from './useLocalSettings';
+import { LocalSettingsDefaults, LocalSettingsKeys, useLocalSettings } from './useLocalSettings';
 import { AIModelInfo, defaultOpenAiModelInfos } from './AIModelInfo';
 import { ImportExportModal } from './ImportExportModal';
 
@@ -15,6 +15,8 @@ export const Settings = ({ ...props }: SettingsProps) => {
   const [openAiKey, setOpenAiKey] = localSettings[LocalSettingsKeys.openAiKey];
   const [showOpenAiKey, setShowOpenAiKey] = React.useState(false);
   const [customOpenAiModelInfos, setCustomOpenAiModelInfos] = localSettings[LocalSettingsKeys.customOpenAiModelInfos];
+  const mergedOpenAiModels: AIModelInfo[] = [...defaultOpenAiModelInfos, ...(customOpenAiModelInfos ?? [])];
+  const [defaultOpenAiModel, setDefaultOpenAiModel] = localSettings[LocalSettingsKeys.defaultOpenAiModel];
   const [newOpenAiModelName, setNewOpenAiModelName] = React.useState('');
   const [newOpenAiModelId, setNewOpenAiModelId] = React.useState('');
   const [newOpenAiModelMaxTokens, setNewOpenAiModelMaxTokens] = React.useState('');
@@ -31,6 +33,11 @@ export const Settings = ({ ...props }: SettingsProps) => {
     if (index >= 0) {
       newCustomOpenAiModels.splice(index, 1);
       setCustomOpenAiModelInfos(newCustomOpenAiModels);
+
+      // Ensure there's a default set
+      if (defaultOpenAiModel === id) {
+        setDefaultOpenAiModel(LocalSettingsDefaults[LocalSettingsKeys.defaultOpenAiModel]);
+      }
     }
   };
 
@@ -117,6 +124,14 @@ export const Settings = ({ ...props }: SettingsProps) => {
     newOpenAiModelId &&
     newOpenAiModelMaxTokens;
 
+  const openAiModelOptionElements = mergedOpenAiModels.map((model, i) => {
+    return (
+      <option key={`open-ai-model-${i}`} value={model.id}>
+        {model.name}
+      </option>
+    );
+  });
+
   return (
     <div {...props} className={classNames(props.className)} style={{ ...props.style }}>
       {showImportExportModal && <ImportExportModal show={showImportExportModal} setShow={setShowImportExportModal} />}
@@ -153,67 +168,85 @@ export const Settings = ({ ...props }: SettingsProps) => {
               </Form.Group>
               <Card>
                 <Card.Header>AI Models</Card.Header>
-                <Card.Body>
-                  <div className="d-flex flex-column gap-1">
-                    {aiModelElements}
-                    {aiModelElements.length > 0 && <hr className="my-1" />}
-                    <div className="d-flex flex-wrap align-items-center gap-1">
-                      <Form.Control
-                        type="text"
-                        placeholder="Display name"
-                        value={newOpenAiModelName}
-                        style={{ maxWidth: 200 }}
-                        className="w-100"
-                        onChange={(e) => setNewOpenAiModelName(e.target.value)}
-                      />
-                      <Form.Control
-                        type="text"
-                        placeholder="Model ID"
-                        className="font-monospace w-100"
-                        // style={{ fontSize: '80%' }}
-                        value={newOpenAiModelId}
-                        style={{ maxWidth: 200 }}
-                        onChange={(e) => setNewOpenAiModelId(e.target.value)}
-                      />
-                      <Form.Control
-                        type="number"
-                        min={0}
-                        step={1}
-                        placeholder="Max Tokens"
-                        value={newOpenAiModelMaxTokens}
-                        onChange={(e) => setNewOpenAiModelMaxTokens(e.target.value)}
-                        style={{ maxWidth: 150 }}
-                        className="w-100"
-                      />
-                      <Form.Control
-                        type="number"
-                        min={0}
-                        step={0.001}
-                        placeholder="Cost In (1K)"
-                        value={newOpenAiModelCostPer1kInput}
-                        onChange={(e) => setNewOpenAiModelCostPer1kInput(e.target.value)}
-                        style={{ maxWidth: 150 }}
-                        className="w-100"
-                      />
-                      <Form.Control
-                        type="number"
-                        min={0}
-                        step={0.001}
-                        placeholder="Cost Out (1K)"
-                        value={newOpenAiModelCostPer1kOutput}
-                        onChange={(e) => setNewOpenAiModelCostPer1kOutput(e.target.value)}
-                        style={{ maxWidth: 150 }}
-                        className="w-100"
-                      />
-                      <Button variant="outline-primary" onClick={handleAddNewOpenAiModel} disabled={!canAddOpenAiModel}>
-                        <FaPlus />
-                      </Button>
+                <Card.Body className="d-flex flex-column gap-3">
+                  <div>
+                    <div className="d-flex flex-column gap-1">
+                      {aiModelElements}
+                      {aiModelElements.length > 0 && <hr className="my-1" />}
+                      <div className="d-flex flex-wrap align-items-center gap-1">
+                        <Form.Control
+                          type="text"
+                          placeholder="Display name"
+                          value={newOpenAiModelName}
+                          style={{ maxWidth: 200 }}
+                          className="w-100"
+                          onChange={(e) => setNewOpenAiModelName(e.target.value)}
+                        />
+                        <Form.Control
+                          type="text"
+                          placeholder="Model ID"
+                          className="font-monospace w-100"
+                          // style={{ fontSize: '80%' }}
+                          value={newOpenAiModelId}
+                          style={{ maxWidth: 200 }}
+                          onChange={(e) => setNewOpenAiModelId(e.target.value)}
+                        />
+                        <Form.Control
+                          type="number"
+                          min={0}
+                          step={1}
+                          placeholder="Max Tokens"
+                          value={newOpenAiModelMaxTokens}
+                          onChange={(e) => setNewOpenAiModelMaxTokens(e.target.value)}
+                          style={{ maxWidth: 150 }}
+                          className="w-100"
+                        />
+                        <Form.Control
+                          type="number"
+                          min={0}
+                          step={0.001}
+                          placeholder="Cost In (1K)"
+                          value={newOpenAiModelCostPer1kInput}
+                          onChange={(e) => setNewOpenAiModelCostPer1kInput(e.target.value)}
+                          style={{ maxWidth: 150 }}
+                          className="w-100"
+                        />
+                        <Form.Control
+                          type="number"
+                          min={0}
+                          step={0.001}
+                          placeholder="Cost Out (1K)"
+                          value={newOpenAiModelCostPer1kOutput}
+                          onChange={(e) => setNewOpenAiModelCostPer1kOutput(e.target.value)}
+                          style={{ maxWidth: 150 }}
+                          className="w-100"
+                        />
+                        <Button
+                          variant="outline-primary"
+                          onClick={handleAddNewOpenAiModel}
+                          disabled={!canAddOpenAiModel}
+                        >
+                          <FaPlus />
+                        </Button>
+                      </div>
                     </div>
+                    <Form.Text className="text-muted">
+                      Supports all OpenAI chat models (legacy not supported). Enter a display name, model ID, the max
+                      number of tokens for the model, and the $ cost for input/output per 1K tokens.
+                    </Form.Text>
                   </div>
-                  <Form.Text className="text-muted">
-                    Supports all OpenAI chat models (legacy not supported). Enter a display name, model ID, the max
-                    number of tokens for the model, and the $ cost for input/output per 1K tokens.
-                  </Form.Text>
+                  <Form.Group controlId="model-group">
+                    <Form.Label className="small fw-bold mb-1">Default AI Model</Form.Label>
+                    <Form.Select
+                      value={defaultOpenAiModel}
+                      onChange={(e) => setDefaultOpenAiModel(e.target.value)}
+                      className="w-100"
+                      style={{ maxWidth: 200 }}
+                    >
+                      {openAiModelOptionElements}
+                    </Form.Select>
+                    <Form.Text className="text-muted">Select the default AI model to use.</Form.Text>
+                  </Form.Group>
                 </Card.Body>
               </Card>
             </Card.Body>

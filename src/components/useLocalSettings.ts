@@ -1,7 +1,7 @@
 import React from 'react';
 import { StorageOptions, useLocalStorage } from 'react-storage-complete';
 import { AIModelInfo, defaultOpenAiModelInfos } from './AIModelInfo';
-import { Preset, defaultPresets, defaultPresetsMap } from './Preset';
+import { Preset, defaultAiModelOption, defaultPresets, defaultPresetsMap } from './Preset';
 
 /**
  * Local settings for the application.
@@ -12,6 +12,7 @@ export enum LocalSettingsKeys {
   presets = 'presets',
   selectedPresetName = 'selectedPresetName',
   customOpenAiModelInfos = 'customOpenAiModelInfos',
+  defaultOpenAiModel = 'defaultOpenAiModel',
   presetName = 'presetName',
   presetDescription = 'presetDescription',
   openAiModel = 'openAiModel',
@@ -36,9 +37,10 @@ export const LocalSettingsDefaults = {
   [LocalSettingsKeys.presets]: defaultPresetsMap,
   [LocalSettingsKeys.selectedPresetName]: '',
   [LocalSettingsKeys.customOpenAiModelInfos]: [] as AIModelInfo[],
+  [LocalSettingsKeys.defaultOpenAiModel]: 'gpt-3.5-turbo',
   [LocalSettingsKeys.presetName]: '',
   [LocalSettingsKeys.presetDescription]: '',
-  [LocalSettingsKeys.openAiModel]: defaultOpenAiModelInfos[0].id,
+  [LocalSettingsKeys.openAiModel]: defaultAiModelOption,
   [LocalSettingsKeys.systemPrompt]: 'You are a helpful assistant.',
   [LocalSettingsKeys.userPrompt]: '',
   [LocalSettingsKeys.variableValues]: {},
@@ -85,6 +87,11 @@ export const useLocalSettings = () => {
     [LocalSettingsKeys.customOpenAiModelInfos]: useLocalStorage<AIModelInfo[]>(
       LocalSettingsKeys.customOpenAiModelInfos,
       LocalSettingsDefaults[LocalSettingsKeys.customOpenAiModelInfos],
+      storageOptions,
+    ),
+    [LocalSettingsKeys.defaultOpenAiModel]: useLocalStorage(
+      LocalSettingsKeys.defaultOpenAiModel,
+      LocalSettingsDefaults[LocalSettingsKeys.defaultOpenAiModel],
       storageOptions,
     ),
     [LocalSettingsKeys.presetName]: useLocalStorage(

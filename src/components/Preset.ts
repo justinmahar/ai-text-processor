@@ -13,11 +13,13 @@ export interface Preset {
   variableOptions: Record<string, string[]>;
 }
 
+export const defaultAiModelOption = 'atp_default';
+
 export const defaultPresets: Preset[] = [
   {
     name: '📖 Extract Data',
     description: 'Extracts data from a body of text.',
-    aiModel: 'gpt-3.5-turbo',
+    aiModel: defaultAiModelOption,
     systemPrompt: 'You are a helpful assistant.',
     userPrompt:
       'Extract {{Data_To_Extract}} from the following {{Document_Type}}, and format the results as {{Formatted_As}}. Do not provide a heading or commentary. Here is the {{Document_Type}}:',
@@ -40,7 +42,7 @@ export const defaultPresets: Preset[] = [
   {
     name: '📖 Summarize',
     description: 'Summarizes a body of text.',
-    aiModel: 'gpt-3.5-turbo',
+    aiModel: defaultAiModelOption,
     systemPrompt: 'You are a helpful assistant.',
     userPrompt: 'In {{Length_of_Summary}} or less, provide a concise summary of the following:',
     averageTokenLength: 4.5,
@@ -54,7 +56,7 @@ export const defaultPresets: Preset[] = [
   {
     name: '📖 Translate Text',
     description: 'Translates text from one language to another.',
-    aiModel: 'gpt-3.5-turbo',
+    aiModel: defaultAiModelOption,
     systemPrompt: 'You are a helpful assistant.',
     userPrompt: 'Translate the following from {{Start_Language}} to {{End_Language}}:',
     averageTokenLength: 4.5,
@@ -128,7 +130,7 @@ export const defaultPresets: Preset[] = [
   {
     name: '📖 Format Text',
     description: 'Adds capitalization and punctuation to a body of text, without changing any words.',
-    aiModel: 'gpt-3.5-turbo',
+    aiModel: defaultAiModelOption,
     systemPrompt: 'You are a helpful assistant.',
     userPrompt:
       'For the following {{Document_Type}}, add punctuation and capitalize the sentences of the text. Do not change the text in any other way and do NOT add or change any words. Here is the {{Document_Type}}:',
