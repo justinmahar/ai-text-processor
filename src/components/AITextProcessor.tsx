@@ -359,9 +359,11 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     const presetUsingDefaultAiModel = preset.aiModel === defaultAiModelValue;
     return (
       <option key={`${presetKey}`} value={presetKey}>
-        {presetKey}{' '}
-        {!presetUsingDefaultAiModel &&
-          `(${mergedOpenAiModelInfos.find((m) => m.id === preset.aiModel)?.name ?? preset.aiModel})`}
+        {presetKey} (
+        {presetUsingDefaultAiModel
+          ? mergedOpenAiModelInfos.find((m) => m.id === defaultOpenAiModel)?.name ?? defaultOpenAiModel
+          : `${mergedOpenAiModelInfos.find((m) => m.id === preset.aiModel)?.name ?? preset.aiModel}`}
+        )
       </option>
     );
   });
