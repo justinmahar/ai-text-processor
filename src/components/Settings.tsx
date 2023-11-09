@@ -54,6 +54,8 @@ export const Settings = ({ ...props }: SettingsProps) => {
     setNewOpenAiModelName('');
     setNewOpenAiModelId('');
     setNewOpenAiModelMaxTokens('');
+    setNewOpenAiModelCostPer1kInput('');
+    setNewOpenAiModelCostPer1kOutput('');
   };
 
   const aiModelElements = mergedOpenAiModelInfos.map((model, i, arr) => {
