@@ -47,7 +47,10 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const [outputs, setOutputs] = localSettings[LocalSettingsKeys.outputs];
   const [openAiKey] = localSettings[LocalSettingsKeys.openAiKey];
   const [customOpenAiModelInfos] = localSettings[LocalSettingsKeys.customOpenAiModelInfos];
-  const mergedOpenAiModelInfos: AIModelInfo[] = [...defaultOpenAiModelInfos, ...(customOpenAiModelInfos ?? [])];
+  const mergedOpenAiModelInfos: AIModelInfo[] = [
+    ...defaultOpenAiModelInfos.filter((m) => !(customOpenAiModelInfos ?? []).find((v) => v.id === m.id)),
+    ...(customOpenAiModelInfos ?? []),
+  ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
   const [defaultOpenAiModel] = localSettings[LocalSettingsKeys.defaultOpenAiModel];
   const aiModelToUse = useDefaultAiModel ? defaultOpenAiModel : openAiModel;
   const [showRawOutput, setShowRawOutput] = localSettings[LocalSettingsKeys.showRawOutput];

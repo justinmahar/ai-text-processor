@@ -15,7 +15,10 @@ export const Settings = ({ ...props }: SettingsProps) => {
   const [openAiKey, setOpenAiKey] = localSettings[LocalSettingsKeys.openAiKey];
   const [showOpenAiKey, setShowOpenAiKey] = React.useState(false);
   const [customOpenAiModelInfos, setCustomOpenAiModelInfos] = localSettings[LocalSettingsKeys.customOpenAiModelInfos];
-  const mergedOpenAiModels: AIModelInfo[] = [...defaultOpenAiModelInfos, ...(customOpenAiModelInfos ?? [])];
+  const mergedOpenAiModelInfos: AIModelInfo[] = [
+    ...defaultOpenAiModelInfos.filter((m) => !(customOpenAiModelInfos ?? []).find((v) => v.id === m.id)),
+    ...(customOpenAiModelInfos ?? []),
+  ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
   const [defaultOpenAiModel, setDefaultOpenAiModel] = localSettings[LocalSettingsKeys.defaultOpenAiModel];
   const [newOpenAiModelName, setNewOpenAiModelName] = React.useState('');
   const [newOpenAiModelId, setNewOpenAiModelId] = React.useState('');
@@ -24,8 +27,6 @@ export const Settings = ({ ...props }: SettingsProps) => {
   const [newOpenAiModelCostPer1kOutput, setNewOpenAiModelCostPer1kOutput] = React.useState('');
   const [showChunkInspector, setShowChunkInspector] = localSettings[LocalSettingsKeys.showChunkInspector];
   const [showImportExportModal, setShowImportExportModal] = React.useState(false);
-
-  const mergedOpenAiModelInfos: AIModelInfo[] = [...defaultOpenAiModelInfos, ...(customOpenAiModelInfos ?? [])];
 
   const handleDeleteOpenAiModel = (id: string) => {
     const newCustomOpenAiModels = [...(customOpenAiModelInfos ?? [])];
@@ -121,14 +122,14 @@ export const Settings = ({ ...props }: SettingsProps) => {
   });
 
   const canAddOpenAiModel =
-    !mergedOpenAiModelInfos.find((m) => m.id === newOpenAiModelId) &&
+    !(customOpenAiModelInfos ?? []).find((m) => m.id === newOpenAiModelId) &&
     newOpenAiModelName &&
     newOpenAiModelId &&
     newOpenAiModelMaxTokens &&
     newOpenAiModelCostPer1kInput.length &&
     newOpenAiModelCostPer1kOutput.length;
 
-  const openAiModelOptionElements = mergedOpenAiModels.map((model, i) => {
+  const openAiModelOptionElements = mergedOpenAiModelInfos.map((model, i) => {
     return (
       <option key={`open-ai-model-${i}`} value={model.id}>
         {model.name}
