@@ -20,8 +20,8 @@ export const Settings = ({ ...props }: SettingsProps) => {
   const [newOpenAiModelName, setNewOpenAiModelName] = React.useState('');
   const [newOpenAiModelId, setNewOpenAiModelId] = React.useState('');
   const [newOpenAiModelMaxTokens, setNewOpenAiModelMaxTokens] = React.useState('');
-  const [newOpenAiModelCostPer1kInput, setNewOpenAiModelCostPer1kInput] = React.useState('0');
-  const [newOpenAiModelCostPer1kOutput, setNewOpenAiModelCostPer1kOutput] = React.useState('0');
+  const [newOpenAiModelCostPer1kInput, setNewOpenAiModelCostPer1kInput] = React.useState('');
+  const [newOpenAiModelCostPer1kOutput, setNewOpenAiModelCostPer1kOutput] = React.useState('');
   const [showChunkInspector, setShowChunkInspector] = localSettings[LocalSettingsKeys.showChunkInspector];
   const [showImportExportModal, setShowImportExportModal] = React.useState(false);
 
@@ -122,7 +122,9 @@ export const Settings = ({ ...props }: SettingsProps) => {
     !mergedOpenAiModelInfos.find((m) => m.id === newOpenAiModelId) &&
     newOpenAiModelName &&
     newOpenAiModelId &&
-    newOpenAiModelMaxTokens;
+    newOpenAiModelMaxTokens &&
+    newOpenAiModelCostPer1kInput.length &&
+    newOpenAiModelCostPer1kOutput.length;
 
   const openAiModelOptionElements = mergedOpenAiModels.map((model, i) => {
     return (
