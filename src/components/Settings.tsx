@@ -235,8 +235,9 @@ export const Settings = ({ ...props }: SettingsProps) => {
                       </div>
                     </div>
                     <Form.Text className="text-muted">
-                      Supports all OpenAI chat models (legacy not supported). Enter a display name, model ID, the max
-                      number of tokens for the model, and the $ cost for input/output per 1K tokens.
+                      Supports all <a href="https://platform.openai.com/docs/models">OpenAI chat models</a> (legacy not
+                      supported). Enter a display name, model ID, the max number of tokens for the model, and the $ cost
+                      for input/output per 1K tokens.
                     </Form.Text>
                   </div>
                   <Form.Group controlId="model-group">
