@@ -578,7 +578,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const canSave = !!presetName.trim() && (hasMeaningfulChanges || hasSuperfluousChanges);
   const canReset = !!selectedPreset && canSave;
   const configured = !!openAiModel && !!userPrompt;
-  const canExecute = configured && !!input;
+  const canExecute = configured;
   const hasInput = (input ?? '').length > 0;
 
   return (
