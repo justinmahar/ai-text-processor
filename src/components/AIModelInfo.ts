@@ -9,7 +9,7 @@ export interface AIModelInfo {
 export const defaultOpenAiModelInfos: AIModelInfo[] = [
   {
     id: 'gpt-3.5-turbo',
-    name: 'GPT-3.5',
+    name: 'GPT-3.5 Turbo',
     maxTokens: 4097,
     costPer1kInput: 0.0015,
     costPer1kOutput: 0.002,
