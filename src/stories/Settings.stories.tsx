@@ -1,26 +1,16 @@
-/*
- * More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
- * More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
- * More on args: https://storybook.js.org/docs/react/writing-stories/args
- * More on argTypes: https://storybook.js.org/docs/react/api/argtypes
- */
-import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-
+import type { Meta, StoryObj } from '@storybook/react';
 import { Settings as SettingsComponent } from '../components/Settings';
 
-export default {
-  title: 'Utilities/AI Text Processor',
-  component: SettingsComponent,
-  parameters: {
-    controls: {
-      disabled: true,
-    },
-    options: { showPanel: false },
-  },
-} as ComponentMeta<typeof SettingsComponent>;
+// === Setup ===
+const StoryComponenet = SettingsComponent; // <-- Set to your component
+const meta: Meta<typeof StoryComponenet> = {
+  title: 'Utilities/AI Text Processor', // <-- Set to your story title
+  component: StoryComponenet,
+};
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-const Template: ComponentStory<typeof SettingsComponent> = (args) => <SettingsComponent {...args} />;
-
-export const Settings = Template.bind({});
-Settings.args = {};
+// === Stories ===
+export const Settings: Story = {
+  args: {},
+};

@@ -1,26 +1,22 @@
-/*
- * More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
- * More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
- * More on args: https://storybook.js.org/docs/react/writing-stories/args
- * More on argTypes: https://storybook.js.org/docs/react/api/argtypes
- */
-import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-
+import type { Meta, StoryObj } from '@storybook/react';
 import { AITextProcessor as ProcessorComponent } from '../components/AITextProcessor';
 
-export default {
-  title: 'Utilities/AI Text Processor',
-  component: ProcessorComponent,
+// === Setup ===
+const StoryComponenet = ProcessorComponent; // <-- Set to your component
+const meta: Meta<typeof StoryComponenet> = {
+  title: 'Utilities/AI Text Processor', // <-- Set to your story title
+  component: StoryComponenet,
   parameters: {
     controls: {
       disabled: true,
     },
     options: { showPanel: false },
   },
-} as ComponentMeta<typeof ProcessorComponent>;
+};
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-const Template: ComponentStory<typeof ProcessorComponent> = (args) => <ProcessorComponent {...args} />;
-
-export const Processor = Template.bind({});
-Processor.args = {};
+// === Stories ===
+export const Processor: Story = {
+  args: {},
+};

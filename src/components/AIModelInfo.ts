@@ -11,8 +11,8 @@ export const defaultOpenAiModelInfos: AIModelInfo[] = [
     id: 'gpt-3.5-turbo',
     name: 'GPT-3.5 Turbo',
     maxTokens: 4097,
-    costPer1kInput: 0.0015,
-    costPer1kOutput: 0.002,
+    costPer1kInput: 0.0005,
+    costPer1kOutput: 0.0015,
   },
   {
     id: 'gpt-3.5-turbo-16k',
@@ -34,5 +34,12 @@ export const defaultOpenAiModelInfos: AIModelInfo[] = [
     maxTokens: 32768,
     costPer1kInput: 0.06,
     costPer1kOutput: 0.12,
+  },
+  {
+    id: 'gpt-4-turbo-preview',
+    name: 'GPT-4 Turbo Preview 128K',
+    maxTokens: 128000,
+    costPer1kInput: 0.01,
+    costPer1kOutput: 0.03,
   },
 ];
