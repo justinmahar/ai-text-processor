@@ -1,6 +1,6 @@
 {
   "name": "ai-text-processor",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "coreVersion": "3.0.7",
   "author": "Justin Mahar <contact@justinmahar.com>",
   "description": "Utility for processing text using AI. Summarize, analyze, extract, translate, format, and more! ✨",
