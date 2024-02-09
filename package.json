@@ -1,7 +1,7 @@
 {
   "name": "ai-text-processor",
   "version": "1.0.14",
-  "coreVersion": "3.0.2",
+  "coreVersion": "3.0.7",
   "author": "Justin Mahar <contact@justinmahar.com>",
   "description": "Utility for processing text using AI. Summarize, analyze, extract, translate, format, and more! ✨",
   "homepage": "https://justinmahar.github.io/ai-text-processor/",
@@ -13,7 +13,7 @@
     "start": "npm run storybook",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "preship": "npm run build && git diff-index --quiet HEAD && npm version patch -m \"Build, version, and publish.\"",
+    "preship": "npm run build && git diff-index HEAD && npm version patch -m \"Build, version, and publish.\"",
     "ship": "npm publish --access public",
     "postship": "git push",
     "update": "rm -rf .lockblocks && git clone -q git@github.com:justinmahar/react-kindling.git ./.lockblocks && lockblocks ./.lockblocks . --verbose && rm -rf .lockblocks && echo '' && echo ' → Be sure to run `npm i` to install new dependencies.' && echo ''",
