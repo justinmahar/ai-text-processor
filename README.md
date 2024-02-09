@@ -144,4 +144,4 @@ If you found this project helpful, let the community know by giving it a [star](
 
 ## License
 
-See [LICENSE.md](https://justinmahar.github.io/ai-text-processor/?path=/story/license--page).
+See [LICENSE.md](https://justinmahar.github.io/ai-text-processor/?path=/docs/license--docs).
