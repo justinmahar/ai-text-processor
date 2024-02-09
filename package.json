@@ -1,7 +1,7 @@
 {
   "name": "ai-text-processor",
   "version": "1.0.15",
-  "coreVersion": "3.0.7",
+  "coreVersion": "3.0.9",
   "author": "Justin Mahar <contact@justinmahar.com>",
   "description": "Utility for processing text using AI. Summarize, analyze, extract, translate, format, and more! ✨",
   "homepage": "https://justinmahar.github.io/ai-text-processor/",
@@ -83,7 +83,7 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-storybook": "^0.6.15",
     "eslint": "^8.56.0",
-    "lockblocks": "^1.1.4",
+    "lockblocks": "^1.1.8",
     "openai-ext": "^1.2.7",
     "prettier": "^3.2.5",
     "react-bootstrap": "^2.8.0",
