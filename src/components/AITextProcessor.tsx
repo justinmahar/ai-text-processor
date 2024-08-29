@@ -519,6 +519,14 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
             value={currVarValue}
             onChange={(e) => handleSetVariableValue(variable, e.target.value)}
             style={{ width: 150, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                if (canExecute) {
+                  handleExecute();
+                  e.preventDefault();
+                }
+              }
+            }}
           />
           <Dropdown.Toggle split variant="secondary" id={`variable-dropdown-${currVarName}`} />
           <Dropdown.Menu>{currValueDropdownItemElements}</Dropdown.Menu>
@@ -934,6 +942,14 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                     handleSetInput(e.target.value);
                   }}
                   onFocus={handleInputTextFieldFocus}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.shiftKey) {
+                      if (canExecute) {
+                        handleExecute();
+                        e.preventDefault();
+                      }
+                    }
+                  }}
                 />
               </Form.Group>
             )}
