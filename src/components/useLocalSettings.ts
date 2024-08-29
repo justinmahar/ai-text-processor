@@ -1,5 +1,5 @@
 import React from 'react';
-import { StorageOptions, useLocalStorage } from 'react-storage-complete';
+import { StorageOptions, useLocalStorage, useSessionStorage } from 'react-storage-complete';
 import { AIModelInfo, defaultOpenAiModelInfos } from './AIModelInfo';
 import { Preset, defaultAiModelOption, defaultPresets, defaultPresetsMap } from './Preset';
 
@@ -81,7 +81,7 @@ export const useLocalSettings = () => {
       LocalSettingsDefaults[LocalSettingsKeys.presets],
       storageOptions,
     ),
-    [LocalSettingsKeys.selectedPresetName]: useLocalStorage(
+    [LocalSettingsKeys.selectedPresetName]: useSessionStorage(
       LocalSettingsKeys.selectedPresetName,
       LocalSettingsDefaults[LocalSettingsKeys.selectedPresetName],
       storageOptions,
@@ -96,87 +96,87 @@ export const useLocalSettings = () => {
       LocalSettingsDefaults[LocalSettingsKeys.defaultOpenAiModel],
       storageOptions,
     ),
-    [LocalSettingsKeys.presetName]: useLocalStorage(
+    [LocalSettingsKeys.presetName]: useSessionStorage(
       LocalSettingsKeys.presetName,
       LocalSettingsDefaults[LocalSettingsKeys.presetName],
       storageOptions,
     ),
-    [LocalSettingsKeys.presetDescription]: useLocalStorage(
+    [LocalSettingsKeys.presetDescription]: useSessionStorage(
       LocalSettingsKeys.presetDescription,
       LocalSettingsDefaults[LocalSettingsKeys.presetDescription],
       storageOptions,
     ),
-    [LocalSettingsKeys.openAiModel]: useLocalStorage(
+    [LocalSettingsKeys.openAiModel]: useSessionStorage(
       LocalSettingsKeys.openAiModel,
       LocalSettingsDefaults[LocalSettingsKeys.openAiModel],
       storageOptions,
     ),
-    [LocalSettingsKeys.systemPrompt]: useLocalStorage(
+    [LocalSettingsKeys.systemPrompt]: useSessionStorage(
       LocalSettingsKeys.systemPrompt,
       LocalSettingsDefaults[LocalSettingsKeys.systemPrompt],
       storageOptions,
     ),
-    [LocalSettingsKeys.userPrompt]: useLocalStorage(
+    [LocalSettingsKeys.userPrompt]: useSessionStorage(
       LocalSettingsKeys.userPrompt,
       LocalSettingsDefaults[LocalSettingsKeys.userPrompt],
       storageOptions,
     ),
-    [LocalSettingsKeys.variableValues]: useLocalStorage(
+    [LocalSettingsKeys.variableValues]: useSessionStorage(
       LocalSettingsKeys.variableValues,
       LocalSettingsDefaults[LocalSettingsKeys.variableValues],
       storageOptions,
     ),
-    [LocalSettingsKeys.variableOptions]: useLocalStorage(
+    [LocalSettingsKeys.variableOptions]: useSessionStorage(
       LocalSettingsKeys.variableOptions,
       LocalSettingsDefaults[LocalSettingsKeys.variableOptions],
       storageOptions,
     ),
-    [LocalSettingsKeys.input]: useLocalStorage(
+    [LocalSettingsKeys.input]: useSessionStorage(
       LocalSettingsKeys.input,
       LocalSettingsDefaults[LocalSettingsKeys.input],
       storageOptions,
     ),
-    [LocalSettingsKeys.outputs]: useLocalStorage<string[]>(
+    [LocalSettingsKeys.outputs]: useSessionStorage<string[]>(
       LocalSettingsKeys.outputs,
       LocalSettingsDefaults[LocalSettingsKeys.outputs],
       storageOptions,
     ),
-    [LocalSettingsKeys.showRawOutput]: useLocalStorage(
+    [LocalSettingsKeys.showRawOutput]: useSessionStorage(
       LocalSettingsKeys.showRawOutput,
       LocalSettingsDefaults[LocalSettingsKeys.showRawOutput],
       storageOptions,
     ),
-    [LocalSettingsKeys.averageTokenLength]: useLocalStorage(
+    [LocalSettingsKeys.averageTokenLength]: useSessionStorage(
       LocalSettingsKeys.averageTokenLength,
       LocalSettingsDefaults[LocalSettingsKeys.averageTokenLength],
       storageOptions,
     ),
-    [LocalSettingsKeys.requestMaxTokenRatio]: useLocalStorage(
+    [LocalSettingsKeys.requestMaxTokenRatio]: useSessionStorage(
       LocalSettingsKeys.requestMaxTokenRatio,
       LocalSettingsDefaults[LocalSettingsKeys.requestMaxTokenRatio],
       storageOptions,
     ),
-    [LocalSettingsKeys.chunkOverlapWordCount]: useLocalStorage(
+    [LocalSettingsKeys.chunkOverlapWordCount]: useSessionStorage(
       LocalSettingsKeys.chunkOverlapWordCount,
       LocalSettingsDefaults[LocalSettingsKeys.chunkOverlapWordCount],
       storageOptions,
     ),
-    [LocalSettingsKeys.chunkPrefix]: useLocalStorage(
+    [LocalSettingsKeys.chunkPrefix]: useSessionStorage(
       LocalSettingsKeys.chunkPrefix,
       LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix],
       storageOptions,
     ),
-    [LocalSettingsKeys.showChunkInspector]: useLocalStorage(
+    [LocalSettingsKeys.showChunkInspector]: useSessionStorage(
       LocalSettingsKeys.showChunkInspector,
       LocalSettingsDefaults[LocalSettingsKeys.showChunkInspector],
       storageOptions,
     ),
-    [LocalSettingsKeys.autoShrinkEnabled]: useLocalStorage(
+    [LocalSettingsKeys.autoShrinkEnabled]: useSessionStorage(
       LocalSettingsKeys.autoShrinkEnabled,
       LocalSettingsDefaults[LocalSettingsKeys.autoShrinkEnabled],
       storageOptions,
     ),
-    [LocalSettingsKeys.inputDisabled]: useLocalStorage(
+    [LocalSettingsKeys.inputDisabled]: useSessionStorage(
       LocalSettingsKeys.inputDisabled,
       LocalSettingsDefaults[LocalSettingsKeys.inputDisabled],
       storageOptions,
