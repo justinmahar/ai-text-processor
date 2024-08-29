@@ -584,6 +584,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
     selectedPreset?.chunkOverlapWordCount !== chunkOverlapWordCount ||
     selectedPreset?.chunkPrefix !== chunkPrefix ||
     !!selectedPreset?.autoShrink !== !!autoShrinkEnabled ||
+    !!selectedPreset?.inputDisabled !== !!inputDisabled ||
     JSON.stringify(selectedPreset?.variableOptions ?? {}) !== JSON.stringify(variableOptions ?? {});
   /** Has changes the user might not necessarily be interested in saving. */
   const hasSuperfluousChanges =
