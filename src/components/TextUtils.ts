@@ -50,7 +50,12 @@ export class TextUtils {
           chunkWordCount = 0;
         }
       }
-      if (chunkBuffer.length > 0) {
+
+      if (
+        chunkBuffer.length > 0 ||
+        // Allow empty inputs
+        input.trim() === ''
+      ) {
         chunks.push(chunkBuffer);
       }
     }

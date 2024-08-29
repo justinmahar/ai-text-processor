@@ -42,4 +42,18 @@ export const defaultOpenAiModelInfos: AIModelInfo[] = [
     costPer1kInput: 0.01,
     costPer1kOutput: 0.03,
   },
+  {
+    id: 'gpt-4o',
+    name: 'GPT-4 Omni 128K',
+    maxTokens: 128000,
+    costPer1kInput: 0.005,
+    costPer1kOutput: 0.015,
+  },
+  {
+    id: 'gpt-4o-mini',
+    name: 'GPT-4 Omni Mini 128K',
+    maxTokens: 128000,
+    costPer1kInput: 0.00015,
+    costPer1kOutput: 0.0006,
+  },
 ];

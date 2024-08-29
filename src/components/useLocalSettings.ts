@@ -37,7 +37,7 @@ export const LocalSettingsDefaults = {
   [LocalSettingsKeys.presets]: defaultPresetsMap,
   [LocalSettingsKeys.selectedPresetName]: '',
   [LocalSettingsKeys.customOpenAiModelInfos]: [] as AIModelInfo[],
-  [LocalSettingsKeys.defaultOpenAiModel]: 'gpt-3.5-turbo',
+  [LocalSettingsKeys.defaultOpenAiModel]: 'gpt-4o',
   [LocalSettingsKeys.presetName]: '',
   [LocalSettingsKeys.presetDescription]: '',
   [LocalSettingsKeys.openAiModel]: defaultAiModelOption,
