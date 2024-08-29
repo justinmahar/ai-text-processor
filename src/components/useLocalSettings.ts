@@ -20,6 +20,7 @@ export enum LocalSettingsKeys {
   userPrompt = 'userPrompt',
   variableValues = 'variableValues',
   variableOptions = 'variableOptions',
+  inputDisabled = 'inputDisabled',
   input = 'input',
   outputs = 'outputs',
   showRawOutput = 'showRawOutput',
@@ -54,6 +55,7 @@ export const LocalSettingsDefaults = {
   [LocalSettingsKeys.chunkPrefix]: '',
   [LocalSettingsKeys.showChunkInspector]: false,
   [LocalSettingsKeys.autoShrinkEnabled]: false,
+  [LocalSettingsKeys.inputDisabled]: false,
 };
 
 export const useLocalSettings = () => {
@@ -172,6 +174,11 @@ export const useLocalSettings = () => {
     [LocalSettingsKeys.autoShrinkEnabled]: useLocalStorage(
       LocalSettingsKeys.autoShrinkEnabled,
       LocalSettingsDefaults[LocalSettingsKeys.autoShrinkEnabled],
+      storageOptions,
+    ),
+    [LocalSettingsKeys.inputDisabled]: useLocalStorage(
+      LocalSettingsKeys.inputDisabled,
+      LocalSettingsDefaults[LocalSettingsKeys.inputDisabled],
       storageOptions,
     ),
   };

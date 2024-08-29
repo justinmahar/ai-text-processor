@@ -40,6 +40,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const useDefaultAiModel = openAiModel === defaultAiModelValue;
   const [systemPrompt, setSystemPrompt] = localSettings[LocalSettingsKeys.systemPrompt];
   const [userPrompt, setUserPrompt] = localSettings[LocalSettingsKeys.userPrompt];
+  const [inputDisabled, setInputDisabled] = localSettings[LocalSettingsKeys.inputDisabled];
   const variables = [...new Set(`${systemPrompt}\n${userPrompt}`.match(/\{\{([\w_-]+)\}\}/g) ?? [])];
   const [variableValues, setVariableValues] = localSettings[LocalSettingsKeys.variableValues];
   const [variableOptions, setVariableOptions] = localSettings[LocalSettingsKeys.variableOptions];
@@ -234,6 +235,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       setAutoShrinkEnabled(LocalSettingsDefaults[LocalSettingsKeys.autoShrinkEnabled]);
       setVariableValues(LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
       setVariableOptions(LocalSettingsDefaults[LocalSettingsKeys.variableOptions]);
+      setInputDisabled(LocalSettingsDefaults[LocalSettingsKeys.inputDisabled]);
     } else {
       const chosenPreset: Preset | undefined = (mergedPresets ?? {})[presetName];
       if (chosenPreset) {
@@ -256,6 +258,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
         setAutoShrinkEnabled(chosenPreset?.autoShrink ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
         setVariableValues(chosenPreset?.variableValues ?? LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
         setVariableOptions(chosenPreset?.variableOptions ?? LocalSettingsDefaults[LocalSettingsKeys.variableOptions]);
+        setInputDisabled(chosenPreset?.inputDisabled ?? LocalSettingsDefaults[LocalSettingsKeys.inputDisabled]);
       }
     }
     setVariableDeletionConfirmationIndex(-1);
@@ -275,6 +278,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       autoShrink: !!autoShrinkEnabled,
       variableValues: variableValues ?? {},
       variableOptions: variableOptions ?? {},
+      inputDisabled: !!inputDisabled,
     };
     const newPresets: Preset[] = [...Object.values(mergedPresets ?? {}), presetToSave];
     const newPresetsSortedMap: Record<string, Preset> = toSortedPresetsMap(newPresets);
@@ -482,6 +486,13 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
   const handleCancelDeleteVariableOption = () => {
     setVariableDeletionConfirmationIndex(-1);
   };
+
+  /** Clear input when input disabled. */
+  React.useEffect(() => {
+    if (!!inputDisabled) {
+      setInput('');
+    }
+  }, [inputDisabled, setInput]);
 
   const variableElements = variables.map((variable, i) => {
     const currVarValue = (variableValues ?? {})[variable] ?? '';
@@ -756,8 +767,9 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                     />
                     <div className="d-flex justify-content-between gap-2">
                       <Form.Text className="text-muted">
-                        Provide the prompt used to process the text. The input text will be appended to the end of this
-                        prompt. You can optionally include variables in double curly braces, like so: {`{{Var_Name}}`}
+                        Provide the prompt used to process the text. The input text, if any, will be appended to the end
+                        of this prompt. You can optionally include variables in double curly braces, like so:{' '}
+                        {`{{Var_Name}}`}
                       </Form.Text>
                       <div className="d-flex align-items-center gap-1 small">
                         <Form.Text className="text-muted my-0">Tokens:</Form.Text>
@@ -766,6 +778,16 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                         </Badge>
                       </div>
                     </div>
+                  </Form.Group>
+                  <Form.Group controlId="input-disabled-group">
+                    <Form.Check
+                      inline
+                      label="Disable input text"
+                      className="user-select-none"
+                      id="checkbox-id-disable-input-text"
+                      checked={!!inputDisabled}
+                      onChange={(e) => setInputDisabled(e.target.checked)}
+                    />
                   </Form.Group>
                   <Accordion>
                     <Accordion.Item eventKey="0">
@@ -898,20 +920,22 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
                 {variableElements}
               </Form.Group>
             )}
-            <Form.Group controlId="form-group-input-text">
-              <Form.Label className="small fw-bold mb-1">Input Text</Form.Label>
-              <Form.Control
-                ref={inputTextFieldRef}
-                as="textarea"
-                placeholder="Enter text to process"
-                rows={8}
-                value={input}
-                onChange={(e) => {
-                  handleSetInput(e.target.value);
-                }}
-                onFocus={handleInputTextFieldFocus}
-              />
-            </Form.Group>
+            {!inputDisabled && (
+              <Form.Group controlId="form-group-input-text">
+                <Form.Label className="small fw-bold mb-1">Input Text</Form.Label>
+                <Form.Control
+                  ref={inputTextFieldRef}
+                  as="textarea"
+                  placeholder="Enter text to process"
+                  rows={8}
+                  value={input}
+                  onChange={(e) => {
+                    handleSetInput(e.target.value);
+                  }}
+                  onFocus={handleInputTextFieldFocus}
+                />
+              </Form.Group>
+            )}
             <div className="d-flex flex-wrap justify-content-between align-items-start gap-2">
               <div className="d-flex flex-wrap align-items-center gap-2">
                 <Button variant="outline-primary" size="sm" onClick={handlePaste}>

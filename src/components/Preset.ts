@@ -11,6 +11,7 @@ export interface Preset {
   autoShrink: boolean;
   variableValues: Record<string, string>;
   variableOptions: Record<string, string[]>;
+  inputDisabled: boolean;
 }
 
 export const defaultAiModelOption = 'atp_default';
@@ -38,6 +39,7 @@ export const defaultPresets: Preset[] = [
       '{{Document_Type}}': ['text', 'video transcript'],
       '{{Formatted_As}}': ['a markdown table', 'a numbered list', 'a percentage', 'bullet points'],
     },
+    inputDisabled: false,
   },
   {
     name: '📖 Summarize',
@@ -52,6 +54,7 @@ export const defaultPresets: Preset[] = [
     autoShrink: false,
     variableValues: { '{{Length_of_Summary}}': '1 paragraph' },
     variableOptions: { '{{Length_of_Summary}}': ['1 paragraph', '2 paragraphs', '3 paragraphs', '1 sentence'] },
+    inputDisabled: false,
   },
   {
     name: '📖 Translate Text',
@@ -126,6 +129,7 @@ export const defaultPresets: Preset[] = [
         'Turkish',
       ],
     },
+    inputDisabled: false,
   },
   {
     name: '📖 Format Text',
@@ -143,6 +147,7 @@ export const defaultPresets: Preset[] = [
     variableOptions: {
       '{{Document_Type}}': ['text', 'video transcript'],
     },
+    inputDisabled: false,
   },
 ];
 
