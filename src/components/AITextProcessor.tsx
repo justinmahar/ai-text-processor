@@ -938,25 +938,28 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
               </Form.Group>
             )}
             <div className="d-flex flex-wrap justify-content-between align-items-start gap-2">
-              <div className="d-flex flex-wrap align-items-center gap-2">
-                <Button variant="outline-primary" size="sm" onClick={handlePaste}>
-                  Paste
-                </Button>
-                <Button variant="outline-danger" size="sm" onClick={handleClearInput} disabled={!hasInput}>
-                  Clear
-                </Button>
-                <Button variant="outline-secondary" size="sm" onClick={handleShrink} disabled={!hasInput}>
-                  <div className="d-flex align-items-center gap-1">Shrink</div>
-                </Button>
-                <Form.Check
-                  inline
-                  label="Auto-shrink"
-                  className="user-select-none small mb-0"
-                  id="auto-shrink-checkbox"
-                  checked={!!autoShrinkEnabled}
-                  onChange={(e) => setAutoShrinkEnabled(e.target.checked)}
-                />
-              </div>
+              {!inputDisabled && (
+                <div className="d-flex flex-wrap align-items-center gap-2">
+                  <Button variant="outline-primary" size="sm" onClick={handlePaste}>
+                    Paste
+                  </Button>
+                  <Button variant="outline-danger" size="sm" onClick={handleClearInput} disabled={!hasInput}>
+                    Clear
+                  </Button>
+                  <Button variant="outline-secondary" size="sm" onClick={handleShrink} disabled={!hasInput}>
+                    <div className="d-flex align-items-center gap-1">Shrink</div>
+                  </Button>
+                  <Form.Check
+                    inline
+                    label="Auto-shrink"
+                    className="user-select-none small mb-0"
+                    id="auto-shrink-checkbox"
+                    checked={!!autoShrinkEnabled}
+                    onChange={(e) => setAutoShrinkEnabled(e.target.checked)}
+                  />
+                </div>
+              )}
+              {inputDisabled && <div></div>}
               <div className="d-flex flex-wrap align-items-center gap-2">
                 <div className="d-flex align-items-center gap-1 small">
                   <Form.Text className="text-muted my-0">Chunks:</Form.Text>
