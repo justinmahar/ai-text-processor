@@ -233,7 +233,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
       setChunkOverlapWordCount(LocalSettingsDefaults[LocalSettingsKeys.chunkOverlapWordCount]);
       setChunkPrefix(LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
       setAutoShrinkEnabled(LocalSettingsDefaults[LocalSettingsKeys.autoShrinkEnabled]);
-      setVariableValues(LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
+      // setVariableValues(LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
       setVariableOptions(LocalSettingsDefaults[LocalSettingsKeys.variableOptions]);
       setInputDisabled(LocalSettingsDefaults[LocalSettingsKeys.inputDisabled]);
     } else {
@@ -256,7 +256,7 @@ export const AITextProcessor = ({ ...props }: AITextProcessorProps) => {
         );
         setChunkPrefix(chosenPreset?.chunkPrefix ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
         setAutoShrinkEnabled(chosenPreset?.autoShrink ?? LocalSettingsDefaults[LocalSettingsKeys.chunkPrefix]);
-        setVariableValues(chosenPreset?.variableValues ?? LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
+        // setVariableValues(chosenPreset?.variableValues ?? LocalSettingsDefaults[LocalSettingsKeys.variableValues]);
         setVariableOptions(chosenPreset?.variableOptions ?? LocalSettingsDefaults[LocalSettingsKeys.variableOptions]);
         setInputDisabled(chosenPreset?.inputDisabled ?? LocalSettingsDefaults[LocalSettingsKeys.inputDisabled]);
       }
